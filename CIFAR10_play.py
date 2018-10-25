@@ -10,11 +10,11 @@ from torch.autograd import Variable
 # --------------------------------------------------------------------------------------------
 # Choose the right values for x.
 input_size = 3072
-hidden_size = 20
+hidden_size = 50
 num_classes = 10
-num_epochs = 2
-batch_size = 16
-learning_rate = 0.001
+num_epochs = 20
+batch_size = 250
+learning_rate = 0.1
 
 #%%
 #my_target_transform = lambda x: "Target_" + str(x)
@@ -63,12 +63,13 @@ class Net(nn.Module):
         self.fc1 = nn.Linear(input_size, hidden_size)
         self.relu = nn.ReLU()
         self.fc2 = nn.Linear(hidden_size, num_classes)
-        self.tlogsoftmax = nn.LogSoftmax(dim=1)
+        #self.tsoftmax = nn.Softmax(dim=1)
 
     def forward(self, x):
         out = self.fc1(x)
         out = self.relu(out)
-        out = self.tlogsoftmax(self.fc2(out))
+        out = self.fc2(out)
+        #out = self.tsoftmax(out)
         return out
 #%%
 # --------------------------------------------------------------------------------------------
@@ -103,34 +104,38 @@ for epoch in range(num_epochs):
 correct = 0
 total = 0
 for images, labels in test_loader:
-    images = Variable(images.view(-1, 3, 28 * 28)).cuda()
+    images = Variable(images.view(-1, 3 * 32 * 32)) # .cuda()
     outputs = net(images)
     _, predicted = torch.max(outputs.data, 1)
     total += labels.size(0)
-    correct += (predicted == labels)
+    correct += (predicted == labels).sum()
 
 print('Accuracy of the network on the 10000 test images: %d %%' % (100 * correct / total))
 # --------------------------------------------------------------------------------------------
 
 _, predicted = torch.max(outputs.data, 1)
 print('Predicted: ', ' '.join('%5s' % classes[predicted[j]] for j in range(4)))
+#%%
 # --------------------------------------------------------------------------------------------
 # There is bug here find it and fix it
 class_correct = list(0. for i in range(10))
 class_total = list(0. for i in range(10))
 for data in test_loader:
     images, labels = data
-    images = Variable(images.view(-1,1* 32 * 32)).cuda()
+    images = Variable(images.view(-1, 3* 32 * 32)) #.cuda()
     outputs = net(images)
     _, predicted = torch.max(outputs.data, 1)
+    
     c = (predicted.cpu() == labels)
-    for i in range(4):
+    
+    for i in range(len(c)):
         label = labels[i]
-        class_correct[label] += c[i]
+        class_correct[label] += c[i].int()
         class_total[label] += 1
 
 # --------------------------------------------------------------------------------------------
 for i in range(10):
     print('Accuracy of %5s : %2d %%' % (classes[i], 100 * class_correct[i] / class_total[i]))
+#%%
 # --------------------------------------------------------------------------------------------
 torch.save(net.state_dict(), 'model.pkl')
