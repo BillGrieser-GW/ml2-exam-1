@@ -63,15 +63,16 @@ class Net(nn.Module):
         self.fc1 = nn.Linear(input_size, hidden_size)
         self.relu = nn.ReLU()
         self.fc2 = nn.Linear(hidden_size, num_classes)
-        #self.tsoftmax = nn.Softmax(dim=1)
+        self.tsoftmax = nn.Softmax(dim=1)
 
     def forward(self, x):
         out = self.fc1(x)
         out = self.relu(out)
         out = self.fc2(out)
-        #out = self.tsoftmax(out)
+        out = self.tsoftmax(out)
         return out
 #%%
+torch.manual_seed(267)
 # --------------------------------------------------------------------------------------------
 # Choose the right argument for x
 net = Net(input_size, hidden_size, num_classes)
@@ -138,4 +139,4 @@ for i in range(10):
     print('Accuracy of %5s : %2d %%' % (classes[i], 100 * class_correct[i] / class_total[i]))
 #%%
 # --------------------------------------------------------------------------------------------
-torch.save(net.state_dict(), 'model.pkl')
+torch.save(net.state_dict(), './model.pkl')
