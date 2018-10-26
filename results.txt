@@ -1,0 +1,72 @@
+#
+# With purelin transfer function
+#
+
+Epoch [1/20], Step [100/200], Loss: 1.7698
+Epoch [1/20], Step [200/200], Loss: 1.6233
+Epoch [2/20], Step [100/200], Loss: 1.6149
+Epoch [2/20], Step [200/200], Loss: 1.8635
+Epoch [3/20], Step [100/200], Loss: 1.6918
+Epoch [3/20], Step [200/200], Loss: 1.5002
+Epoch [4/20], Step [100/200], Loss: 1.4421
+Epoch [4/20], Step [200/200], Loss: 1.5483
+Epoch [5/20], Step [100/200], Loss: 1.6190
+Epoch [5/20], Step [200/200], Loss: 1.6290
+Epoch [6/20], Step [100/200], Loss: 1.4223
+Epoch [6/20], Step [200/200], Loss: 1.4689
+Epoch [7/20], Step [100/200], Loss: 1.3998
+Epoch [7/20], Step [200/200], Loss: 1.3422
+Epoch [8/20], Step [100/200], Loss: 1.3822
+Epoch [8/20], Step [200/200], Loss: 1.4390
+Epoch [9/20], Step [100/200], Loss: 1.3388
+Epoch [9/20], Step [200/200], Loss: 1.4182
+Epoch [10/20], Step [100/200], Loss: 1.3962
+Epoch [10/20], Step [200/200], Loss: 1.5416
+Epoch [11/20], Step [100/200], Loss: 1.3933
+Epoch [11/20], Step [200/200], Loss: 1.5037
+Epoch [12/20], Step [100/200], Loss: 1.4741
+Epoch [12/20], Step [200/200], Loss: 1.3207
+Epoch [13/20], Step [100/200], Loss: 1.2820
+Epoch [13/20], Step [200/200], Loss: 1.3915
+Epoch [14/20], Step [100/200], Loss: 1.2842
+Epoch [14/20], Step [200/200], Loss: 1.4008
+Epoch [15/20], Step [100/200], Loss: 1.2111
+Epoch [15/20], Step [200/200], Loss: 1.3348
+Epoch [16/20], Step [100/200], Loss: 1.2624
+Epoch [16/20], Step [200/200], Loss: 1.3507
+Epoch [17/20], Step [100/200], Loss: 1.2325
+Epoch [17/20], Step [200/200], Loss: 1.2233
+Epoch [18/20], Step [100/200], Loss: 1.2651
+Epoch [18/20], Step [200/200], Loss: 1.3788
+Epoch [19/20], Step [100/200], Loss: 1.3083
+Epoch [19/20], Step [200/200], Loss: 1.3953
+Epoch [20/20], Step [100/200], Loss: 1.4063
+Epoch [20/20], Step [200/200], Loss: 1.3956
+Accuracy of the network on the 10000 test images: 45 %
+Predicted:   frog  ship horse  frog
+Accuracy of airplane : 41 %
+Accuracy of automobile : 50 %
+Accuracy of  bird : 32 %
+Accuracy of   cat : 27 %
+Accuracy of  deer : 37 %
+Accuracy of   dog : 36 %
+Accuracy of  frog : 61 %
+Accuracy of horse : 51 %
+Accuracy of  ship : 65 %
+Accuracy of truck : 53 %
+
+-- 400 epcohs gpu, 50 hidden nodes
+Process finished with exit code 0
+
+Accuracy of the network on the 10000 test images: 47 %
+Predicted:   deer   cat  ship  ship
+Accuracy of airplane : 57 %
+Accuracy of automobile : 53 %
+Accuracy of  bird : 32 %
+Accuracy of   cat : 33 %
+Accuracy of  deer : 41 %
+Accuracy of   dog : 34 %
+Accuracy of  frog : 54 %
+Accuracy of horse : 53 %
+Accuracy of  ship : 65 %
+Accuracy of truck : 51 %
