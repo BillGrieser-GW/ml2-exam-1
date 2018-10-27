@@ -139,4 +139,33 @@ Accuracy of  ship : 45 %
 Accuracy of truck :  1 %
 
 Process finished with exit code 0
+--500 x 100
+Epoch [200/200], Step [200/200], Loss: 1.7175
+Accuracy of the network on the 10000 test images: 53 %
+Predicted:   bird automobile horse  frog
+Accuracy of airplane : 67 %
+Accuracy of automobile : 61 %
+Accuracy of  bird : 42 %
+Accuracy of   cat : 39 %
+Accuracy of  deer : 41 %
+Accuracy of   dog : 41 %
+Accuracy of  frog : 63 %
+Accuracy of horse : 59 %
+Accuracy of  ship : 71 %
+Accuracy of truck : 45 %
 
+
+-- Grayscale 500 x 100 lr = .05 400 epochs
+Epoch [400/400], Step [200/200], Loss: 1.6881
+Accuracy of the network on the 10000 test images: 45 %
+Predicted:    dog airplane truck  frog
+Accuracy of airplane : 50 %
+Accuracy of automobile : 57 %
+Accuracy of  bird : 41 %
+Accuracy of   cat :  0 %
+Accuracy of  deer : 35 %
+Accuracy of   dog : 53 %
+Accuracy of  frog : 53 %
+Accuracy of horse : 54 %
+Accuracy of  ship : 59 %
+Accuracy of truck : 52 %

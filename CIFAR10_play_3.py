@@ -16,9 +16,9 @@ hidden_size = 250
 hidden1_size = 500
 hidden2_size = 100
 num_classes = 10
-num_epochs = 400
+num_epochs = 100
 batch_size = 250
-learning_rate = 0.05
+learning_rate = 0.125
 
 FORCE_CPU = False
 
@@ -104,10 +104,10 @@ torch.cuda.manual_seed_all(267)
 net = Net2(input_size, hidden1_size, hidden2_size, num_classes).to(device=run_device)
 #net = Net(input_size, hidden_size, num_classes).to(device=run_device)
 #%%
-#STORED_MODEL = os.path.join(".", "model_gpu.pkl")
+STORED_MODEL = os.path.join(".", "model_cpu_500_100_gray.pkl")
 
-#net.load_state_dict(torch.load('./model_gpu.pkl'))
-#print("Loading from: ", STORED_MODEL)
+net.load_state_dict(torch.load(STORED_MODEL))
+print("Loading from: ", STORED_MODEL)
 # --------------------------------------------------------------------------------------------
 # Choose the right argument for x
 criterion = nn.CrossEntropyLoss()
@@ -173,4 +173,4 @@ for i in range(10):
     print('Accuracy of %5s : %2d %%' % (classes[i], 100 * class_correct[i] / class_total[i]))
 #%%
 # --------------------------------------------------------------------------------------------
-torch.save(net.state_dict(), './model_cpu_500_100_gray.pkl')
+torch.save(net.state_dict(), './model_cpu_500_100_gray_lr0125.pkl')
