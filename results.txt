@@ -70,3 +70,73 @@ Accuracy of  frog : 54 %
 Accuracy of horse : 53 %
 Accuracy of  ship : 65 %
 Accuracy of truck : 51 %
+
+-- 200 epochs, 500 hidden nodes, 32 batch size
+Epoch [200/200], Step [1500/1562], Loss: 1.6144
+Accuracy of the network on the 10000 test images: 53 %
+Predicted:   bird   dog  ship automobile
+Accuracy of airplane : 61 %
+Accuracy of automobile : 62 %
+Accuracy of  bird : 43 %
+Accuracy of   cat : 41 %
+Accuracy of  deer : 42 %
+Accuracy of   dog : 44 %
+Accuracy of  frog : 60 %
+Accuracy of horse : 56 %
+Accuracy of  ship : 67 %
+Accuracy of truck : 58 %
+
+Process finished with exit code 0
+
+-- 200 more epochs
+Epoch [200/200], Step [1500/1562], Loss: 1.5820
+Accuracy of the network on the 10000 test images: 53 %
+Predicted:   bird   dog  ship automobile
+Accuracy of airplane : 60 %
+Accuracy of automobile : 62 %
+Accuracy of  bird : 41 %
+Accuracy of   cat : 42 %
+Accuracy of  deer : 43 %
+Accuracy of   dog : 44 %
+Accuracy of  frog : 58 %
+Accuracy of horse : 57 %
+Accuracy of  ship : 67 %
+Accuracy of truck : 57 %
+
+Process finished with exit code 0
+500 neurons
+
+Epoch [400/400], Step [1500/1562], Loss: 1.6163
+Accuracy of the network on the 10000 test images: 53 %
+Predicted:   deer   dog  ship automobile
+Accuracy of airplane : 60 %
+Accuracy of automobile : 63 %
+Accuracy of  bird : 42 %
+Accuracy of   cat : 41 %
+Accuracy of  deer : 44 %
+Accuracy of   dog : 44 %
+Accuracy of  frog : 60 %
+Accuracy of horse : 56 %
+Accuracy of  ship : 68 %
+Accuracy of truck : 57 %
+
+Process finished with exit code 0
+
+50 x 20 neurons, .01 lr, 400 epochs
+
+Epoch [400/400], Step [1500/1562], Loss: 2.2424
+Accuracy of the network on the 10000 test images: 21 %
+Predicted:   bird automobile  ship automobile
+Accuracy of airplane :  1 %
+Accuracy of automobile : 72 %
+Accuracy of  bird : 30 %
+Accuracy of   cat :  8 %
+Accuracy of  deer :  0 %
+Accuracy of   dog : 14 %
+Accuracy of  frog :  0 %
+Accuracy of horse : 42 %
+Accuracy of  ship : 45 %
+Accuracy of truck :  1 %
+
+Process finished with exit code 0
+

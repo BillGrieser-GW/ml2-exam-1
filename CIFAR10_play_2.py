@@ -12,11 +12,13 @@ from torch.autograd import Variable
 # --------------------------------------------------------------------------------------------
 # Choose the right values for x.
 input_size = 3072
-hidden_size = 500
+#hidden_size = 500
+hidden1_size = 500
+hidden2_size = 100
 num_classes = 10
-num_epochs = 400
-batch_size = 32
-learning_rate = 0.001
+num_epochs = 200
+batch_size = 250
+learning_rate = 0.05
 
 FORCE_CPU = False
 
@@ -73,17 +75,36 @@ class Net(nn.Module):
         out = self.fc2(out)
         out = self.tsoftmax(out)
         return out
+    
+class Net2(nn.Module):
+    def __init__(self, input_size, hidden1_size, hidden2_size, num_classes):
+        super(Net2, self).__init__()
+        self.fc1 = nn.Linear(input_size, hidden1_size)
+        self.transfer1 = nn.ReLU()
+        self.fc2 = nn.Linear(hidden1_size, hidden2_size)
+        self.transfer2 = nn.ReLU()
+        self.fc3 = nn.Linear(hidden2_size, num_classes)
+        self.transfer3 = nn.Softmax(dim=1)
+
+    def forward(self, x):
+        out = self.fc1(x)
+        out = self.transfer1(out)
+        out = self.fc2(out)
+        out = self.transfer2(out)
+        out = self.fc3(out)
+        out = self.transfer3(out)
+        return out
 #%%
 torch.manual_seed(267)
 torch.cuda.manual_seed_all(267)
 # --------------------------------------------------------------------------------------------
 # Create the network on the selected device
-net = Net(input_size, hidden_size, num_classes).to(device=run_device)
+net = Net2(input_size, hidden1_size, hidden2_size, num_classes).to(device=run_device)
+#%%
+#STORED_MODEL = os.path.join(".", "model_gpu.pkl")
 
-STORED_MODEL = os.path.join(".", "model_gpu.pkl")
-
-net.load_state_dict(torch.load('./model_gpu.pkl'))
-print("Loading from: ", STORED_MODEL)
+#net.load_state_dict(torch.load('./model_gpu.pkl'))
+#print("Loading from: ", STORED_MODEL)
 # --------------------------------------------------------------------------------------------
 # Choose the right argument for x
 criterion = nn.CrossEntropyLoss()
@@ -149,4 +170,4 @@ for i in range(10):
     print('Accuracy of %5s : %2d %%' % (classes[i], 100 * class_correct[i] / class_total[i]))
 #%%
 # --------------------------------------------------------------------------------------------
-torch.save(net.state_dict(), './model_gpu_500_400_lr001.pkl')
+torch.save(net.state_dict(), './model_cpu_50_20.pkl')
