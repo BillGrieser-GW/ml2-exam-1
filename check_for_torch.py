@@ -10,3 +10,6 @@ import torch
 print("Torch version:", torch.__version__)
 print("Torch path:", torch.__path__)
 print("Has cuda?:", torch.cuda.is_available())
+
+print("Number of cuda devices:", torch.cuda.device_count())
+
