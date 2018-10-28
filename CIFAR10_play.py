@@ -10,16 +10,13 @@ from torch.autograd import Variable
 # --------------------------------------------------------------------------------------------
 # Choose the right values for x.
 input_size = 3072
-hidden_size = 50
+hidden_size = 1000
 num_classes = 10
-num_epochs = 20
-batch_size = 250
-learning_rate = 0.1
+num_epochs = 10
+batch_size = 512
+learning_rate = 0.01
 
 #%%
-#my_target_transform = lambda x: "Target_" + str(x)
-
-
 # --------------------------------------------------------------------------------------------
 transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
@@ -27,7 +24,7 @@ transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5
 
 train_set = torchvision.datasets.CIFAR10(root='./data_cifar', train=True, download=True, \
                                          transform=transform)
-#%%
+
 train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True)
 
 testset = torchvision.datasets.CIFAR10(root='./data_cifar', train=False, download=True, transform=transform)
@@ -42,11 +39,6 @@ def imshow(img):
     npimg = img.numpy()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
     
-def imshow2(img):
-    img = img / 2 + 0.5
-    npimg = img.numpy()
-    plt.imshow(np.transpose(npimg, (1, 2, 0)))
-
 #%%
 dataiter = iter(train_loader)
 images, labels = dataiter.next()
@@ -98,7 +90,7 @@ for epoch in range(num_epochs):
 
         if (i + 1) % 100 == 0:
             print('Epoch [%d/%d], Step [%d/%d], Loss: %.4f'
-                  % (epoch + 1, num_epochs, i + 1, len(train_set) // batch_size, loss.data[0]))
+                  % (epoch + 1, num_epochs, i + 1, len(train_set) // batch_size, loss.data.item()))
 # --------------------------------------------------------------------------------------------            
 #%%
 # There is bug here find it and fix it
@@ -139,4 +131,4 @@ for i in range(10):
     print('Accuracy of %5s : %2d %%' % (classes[i], 100 * class_correct[i] / class_total[i]))
 #%%
 # --------------------------------------------------------------------------------------------
-torch.save(net.state_dict(), './model.pkl')
+torch.save(net.state_dict(), './model_cpu.pkl')

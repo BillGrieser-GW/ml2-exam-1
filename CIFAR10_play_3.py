@@ -18,7 +18,7 @@ hidden2_size = 100
 num_classes = 10
 num_epochs = 100
 batch_size = 250
-learning_rate = 0.125
+learning_rate = 0.01
 
 FORCE_CPU = False
 

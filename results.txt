@@ -169,3 +169,96 @@ Accuracy of  frog : 53 %
 Accuracy of horse : 54 %
 Accuracy of  ship : 59 %
 Accuracy of truck : 52 %
+
+-- 1000 single neurons, .001 lr
+Epoch [20/20], Step [100/195], Loss: 1.9617
+Accuracy of the network on the 10000 test images: 48 %
+Predicted:   deer   cat  ship  ship
+Accuracy of airplane : 52 %
+Accuracy of automobile : 59 %
+Accuracy of  bird : 33 %
+Accuracy of   cat : 32 %
+Accuracy of  deer : 38 %
+Accuracy of   dog : 33 %
+Accuracy of  frog : 59 %
+Accuracy of horse : 54 %
+Accuracy of  ship : 67 %
+Accuracy of truck : 54 %
+
+=== 400 epochs 500 nodes, lr = .005
+Epoch [400/400], Step [1500/1562], Loss: 1.5217
+Accuracy of the network on the 10000 test images: 53 %
+Predicted:   deer   dog  ship  ship
+Accuracy of airplane : 60 %
+Accuracy of automobile : 60 %
+Accuracy of  bird : 40 %
+Accuracy of   cat : 38 %
+Accuracy of  deer : 44 %
+Accuracy of   dog : 42 %
+Accuracy of  frog : 59 %
+Accuracy of horse : 59 %
+Accuracy of  ship : 67 %
+Accuracy of truck : 59 %
+
+Another 100 epochs
+Epoch [100/100], Step [1500/1562], Loss: 1.6754
+Accuracy of the network on the 10000 test images: 53 %
+Predicted:   deer   dog  ship  ship
+Accuracy of airplane : 60 %
+Accuracy of automobile : 60 %
+Accuracy of  bird : 40 %
+Accuracy of   cat : 39 %
+Accuracy of  deer : 45 %
+Accuracy of   dog : 43 %
+Accuracy of  frog : 59 %
+Accuracy of horse : 59 %
+Accuracy of  ship : 67 %
+Accuracy of truck : 59 %
+
+
+=== 1000 hidden 200 epochs batch=256 lr= .005
+Epoch [200/200], Step [100/195], Loss: 1.6849
+Accuracy of the network on the 10000 test images: 53 %
+Predicted:   deer   dog  ship  ship
+Accuracy of airplane : 59 %
+Accuracy of automobile : 59 %
+Accuracy of  bird : 40 %
+Accuracy of   cat : 40 %
+Accuracy of  deer : 45 %
+Accuracy of   dog : 43 %
+Accuracy of  frog : 59 %
+Accuracy of horse : 58 %
+Accuracy of  ship : 70 %
+Accuracy of truck : 55 %
+
+Process finished with exit code 0
+
+=== 1000 hidden size 200 epochs lr 0.005 batch size = 32 ===
+Epoch [200/200], Step [1500/1562], Loss: 1.5255
+Accuracy of the network on the 10000 test images: 54 %
+Predicted:   deer   dog  ship  ship
+Accuracy of airplane : 63 %
+Accuracy of automobile : 61 %
+Accuracy of  bird : 41 %
+Accuracy of   cat : 42 %
+Accuracy of  deer : 45 %
+Accuracy of   dog : 46 %
+Accuracy of  frog : 60 %
+Accuracy of horse : 58 %
+Accuracy of  ship : 68 %
+Accuracy of truck : 56 %
+
+==== Batch size is 512, 200 epochs
+Accuracy of the network on the 10000 test images: 52 %
+Predicted:   bird   cat  frog   dog
+Accuracy of airplane : 59 %
+Accuracy of automobile : 61 %
+Accuracy of  bird : 37 %
+Accuracy of   cat : 35 %
+Accuracy of  deer : 44 %
+Accuracy of   dog : 37 %
+Accuracy of  frog : 59 %
+Accuracy of horse : 59 %
+Accuracy of  ship : 70 %
+Accuracy of truck : 57 %
+
