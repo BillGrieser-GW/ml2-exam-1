@@ -15,7 +15,7 @@ CHANNELS = 3
 input_size = CHANNELS * 1024
 hidden_size = 1000
 num_classes = 10
-num_epochs =  4
+num_epochs =  200
 batch_size = 500
 learning_rate = 0.005
 FORCE_CPU = False
@@ -74,12 +74,25 @@ class Net(nn.Module):
         out = self.fc2(out)
         out = self.tsoftmax(out)
         return out
+    
+class NetAlt(nn.Module):
+    def __init__(self, input_size, hidden_size, num_classes):
+        super(NetAlt, self).__init__()
+        self.fc1 = nn.Linear(input_size, hidden_size)
+        self.relu = nn.ReLU()
+        self.fc2 = nn.Linear(hidden_size, num_classes)
+
+    def forward(self, x):
+        out = self.fc1(x)
+        out = self.relu(out)
+        out = self.fc2(out)
+        return out
 #%%
 torch.manual_seed(267)
 torch.cuda.manual_seed_all(267)
 # --------------------------------------------------------------------------------------------
 # Create the network on the selected device
-net = Net(input_size, hidden_size, num_classes).to(device=run_device)
+net = NetAlt(input_size, hidden_size, num_classes).to(device=run_device)
 
 STORED_MODEL = os.path.join(".", "model_gpu.pkl")
 
@@ -99,8 +112,7 @@ for epoch in range(num_epochs):
         images= images.view(-1, CHANNELS * 32 * 32)
         
         images, labels = Variable(images).to(device=run_device), Variable(labels).to(device=run_device)
-        images.requires_grad_(True)
-
+        #images.requires_grad_(True)
         optimizer.zero_grad()
         outputs = net(images)
         loss = criterion(outputs, labels)
@@ -111,8 +123,8 @@ for epoch in range(num_epochs):
             print('Epoch [%d/%d], Step [%d/%d], Loss: %.4f'
                   % (epoch + 1, num_epochs, i + 1, len(train_set) // batch_size, loss.data.item()))
             print("Images requires grad:", images.requires_grad)
-            print("Images shape:", images.shape)
-            print("Images grad shape=", images.grad.shape)
+            #print("Images shape:", images.shape)
+            #print("Images grad shape=", images.grad.shape)
 # --------------------------------------------------------------------------------------------            
 #%%
 # There is bug here find it and fix it

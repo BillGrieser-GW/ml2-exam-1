@@ -262,3 +262,16 @@ Accuracy of horse : 59 %
 Accuracy of  ship : 70 %
 Accuracy of truck : 57 %
 
+== play gpu no softmax 200 epochs 1000 neurons 500 batch
+Accuracy of the network on the 10000 test images: 54 %
+Predicted:  truck  frog  frog  frog
+Accuracy of airplane : 62 %
+Accuracy of automobile : 61 %
+Accuracy of  bird : 46 %
+Accuracy of   cat : 37 %
+Accuracy of  deer : 46 %
+Accuracy of   dog : 45 %
+Accuracy of  frog : 60 %
+Accuracy of horse : 59 %
+Accuracy of  ship : 67 %
+Accuracy of truck : 56 %
