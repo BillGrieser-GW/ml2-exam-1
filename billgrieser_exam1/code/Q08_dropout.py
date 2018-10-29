@@ -33,7 +33,7 @@ optimizers = [torch.optim.Adagrad]
 transfer_functions = [nn.ReLU]
 dropout= [0.0, 0.2, 0.5]
 num_classes = 10
-num_epochs = 400
+num_epochs = 50
 batch_size = 32
 learning_rate = .005
 
