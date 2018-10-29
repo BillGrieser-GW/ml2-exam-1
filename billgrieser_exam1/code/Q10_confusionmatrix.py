@@ -24,7 +24,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 # For classification report
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, confusion_matrix
 
 # --------------------------------------------------------------------------------------------
 # Choose the right values for x.
@@ -261,8 +261,7 @@ def show_confusion_matrix(net, run_device):
     
     # x is predicted
     # y is actual
-    c_matrix = np.zeros((num_classes, num_classes))
-    tester = 0
+    c_matrix = np.zeros((num_classes, num_classes), dtype=int)
     
     all_labels = []
     all_predicted = []
@@ -285,16 +284,25 @@ def show_confusion_matrix(net, run_device):
       
     plt.title("Confusion Matrix", fontsize=16)
     sns.set(font_scale=1.0)  # Label size
-    sns.heatmap(c_matrix, annot=True, annot_kws={"size": 14}, robust=True, fmt='0.0f', \
+    sns.heatmap(c_matrix, annot=True, annot_kws={"size": 14}, robust=True, fmt='d', \
                linecolor='gray', linewidths=0.5, square=False, cbar=True, cmap='Blues',
                xticklabels=classes, yticklabels=classes) 
     plt.ylabel('Actual Labels', fontsize=14) 
-    plt.xlabel('Predicted Labels', fontsize=14)            
+    plt.xlabel('Predicted Labels', fontsize=14) 
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45)           
     plt.show()
     
     # Classification Report
     print("\nClassification Report\n")
     print(classification_report(all_labels, all_predicted, target_names=classes))
+    
+    # Confusion Matrix
+    print("\nConfusion matrix (non-graphically)\n")
+    print(c_matrix)
+    
+    return c_matrix
+
     
 #%%  
 # =============================================================================
@@ -320,4 +328,4 @@ if __name__ == "__main__":
                     record_test_results(net, run_device, loss, duration, optimizer, transfer_function)
 #%%
                     # Confusion Matrix
-                    show_confusion_matrix(net, run_device)
+                    c_matrix = show_confusion_matrix(net, run_device)
