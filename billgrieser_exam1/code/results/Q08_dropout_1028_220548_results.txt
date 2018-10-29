@@ -1,0 +1,35 @@
+Net(
+  (layer_01): Linear(in_features=3072, out_features=1000, bias=True)
+  (dropout_layer): Dropout(p=0.5)
+  (output_layer): Linear(in_features=1000, out_features=10, bias=True)
+)
+
+Hidden Layer sizes: [(1000,)]
+Total network weights + biases: 3083010
+Epochs: 2
+Learning rate: 0.005
+Optimizer: Adagrad (
+Parameter Group 0
+    initial_accumulator_value: 0
+    lr: 0.005
+    lr_decay: 0
+    weight_decay: 0
+)
+Transfer Function: <class 'torch.nn.modules.activation.ReLU'>
+Batch Size: 250
+Final loss: 1.5558
+Run device: cpu
+Training run duration (secs): 38.9
+
+Accuracy of the network on the 10000 test images: 49.7%
+
+Accuracy of airplane   : 55.3%
+Accuracy of automobile : 58.0%
+Accuracy of bird       : 34.4%
+Accuracy of cat        : 33.9%
+Accuracy of deer       : 30.1%
+Accuracy of dog        : 37.2%
+Accuracy of frog       : 61.4%
+Accuracy of horse      : 58.4%
+Accuracy of ship       : 67.4%
+Accuracy of truck      : 60.8%

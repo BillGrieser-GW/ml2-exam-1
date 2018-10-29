@@ -105,4 +105,6 @@ venv.bak/
 
 # Project data
 data_cifar/
+*/data_cifar/
 mnist/
+*.pkl

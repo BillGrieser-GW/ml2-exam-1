@@ -15,13 +15,18 @@ print("Has cuda?:", torch.cuda.is_available())
 
 print("Number of cuda devices:", torch.cuda.device_count())
 
-db = sqlite3.connect('run_results.sqlite')
-# Get a cursor object
-cursor = db.cursor()
-cursor.execute('''
-    CREATE TABLE IF NOT EXISTS run_results(id INTEGER PRIMARY KEY, run_name TEXT,
-                       layers TEXT, transfer_functions TEXT, EPOCHS INTEGER,
-                       net_description TEXT, PREDICTIONS TEXT, TIME REAL)
-''')
-db.commit()
-db.close()
+#db = sqlite3.connect('run_results.sqlite')
+## Get a cursor object
+#cursor = db.cursor()
+#cursor.execute('''
+#    CREATE TABLE IF NOT EXISTS run_results(id INTEGER PRIMARY KEY, run_name TEXT,
+#                       layers TEXT, transfer_functions TEXT, EPOCHS INTEGER,
+#                       net_description TEXT, PREDICTIONS TEXT, TIME REAL)
+#''')
+#db.commit()
+#db.close()
+
+p = [(1,'a'), (2, 'b'), (3, 'c')]
+
+for idx, letter in p:
+    print(idx, letter)

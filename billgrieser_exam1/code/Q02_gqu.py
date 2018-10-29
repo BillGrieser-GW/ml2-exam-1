@@ -1,7 +1,9 @@
 # =============================================================================
-# Question 1
+# Question 2
 #
-# Fix bugs, supply initial values for tunables, explore performance
+# Modify Q1 to work on a GPU, if there is one. This code will
+# test for the presence of a GPU and run on the GPU if it is there;
+# otherwise it will run on a CPU
 #
 # The data is located in a folder at the same level as  "code"
 #
@@ -33,6 +35,15 @@ num_epochs = 200
 batch_size = 250
 learning_rate = .01
 
+FORCE_CPU = False
+
+if torch.cuda.is_available() and FORCE_CPU != True:
+    print("Using cuda device for Torch")
+    run_device = torch.device('cuda')
+else:
+    print("Using CPU devices for Torch.")
+    run_device = torch.device('cpu')
+    
 # =============================================================================
 # Load training and test data
 # =============================================================================
@@ -96,22 +107,6 @@ class Net(nn.Module):
         out = self.fc2(out)
         return out
     
-# Define a an alternate model class for comparison that uses
-# Softmax for the second-layer transfer function
-class NetAlt(nn.Module):
-    def __init__(self, input_size, hidden_size, num_classes):
-        super(NetAlt, self).__init__()
-        self.fc1 = nn.Linear(input_size, hidden_size)
-        self.relu = nn.ReLU()
-        self.fc2 = nn.Linear(hidden_size, num_classes)
-        self.softmax = nn.Softmax(dim=1)
-
-    def forward(self, x):
-        out = self.fc1(x)
-        out = self.relu(out)
-        out = self.fc2(out)
-        out = self.softmax(out)
-        return out
 # --------------------------------------------------------------------------------------------
 def get_total_parms(module):
     
@@ -127,7 +122,7 @@ torch.manual_seed(267)
 # Choose the right argument for x
         
 # Instantiate a model
-net = Net(input_size, hidden_size, num_classes)
+net = Net(input_size, hidden_size, num_classes).to(device=run_device)
 print(net)
 total_net_parms = get_total_parms(net)
 print ("Total trainable parameters:", total_net_parms)
@@ -147,7 +142,9 @@ for epoch in range(num_epochs):
 
         images, labels = data
         images= images.view(-1, CHANNELS * 32 * 32)
-        images, labels = Variable(images), Variable(labels)
+        # Put the images and labels in tensors on the run device
+        images= Variable(images).to(device=run_device)
+        labels= Variable(labels).to(device=run_device)
         optimizer.zero_grad()
         outputs = net(images)
         loss = criterion(outputs, labels)
@@ -162,15 +159,16 @@ for epoch in range(num_epochs):
 # Display results summary
 # =============================================================================
 # --------------------------------------------------------------------------------------------
-# There is bug here find it and fix it
 correct = 0
 total = 0
 for images, labels in test_loader:
-    images = Variable(images.view(-1, CHANNELS * 32 * 32))
+    images = Variable(images.view(-1, CHANNELS * 32 * 32)).to(device=run_device)
     outputs = net(images)
     _, predicted = torch.max(outputs.data, 1)
     total += labels.size(0)
-    correct += (predicted == labels).sum()
+    
+    # Bring the predicted values to the CPU to compare against the labels
+    correct += (predicted.cpu() == labels).sum()
 
 print('Accuracy of the network on the 10000 test images: {0:0.1f}%'.format(float(100 * correct) / total))
 # --------------------------------------------------------------------------------------------
@@ -182,10 +180,10 @@ class_correct = list(0. for i in range(num_classes))
 class_total = list(0. for i in range(num_classes))
 for data in test_loader:
     images, labels = data
-    images = Variable(images.view(-1, CHANNELS * 32 * 32))
+    images = Variable(images.view(-1, CHANNELS * 32 * 32)).to(device=run_device)
     outputs = net(images)
     _, predicted = torch.max(outputs.data, 1)
-    c = (predicted == labels)
+    c = (predicted.cpu() == labels)
     for i in range(len(c)):
         label = labels[i]
         class_correct[label] += c[i].int()
@@ -223,6 +221,7 @@ with open(run_base + suffix + '_results.txt', 'w') as rfile:
     rfile.write("Learning rate: {0}\n".format(learning_rate))
     rfile.write("Batch Size: {0}\n".format(batch_size))
     rfile.write("Final loss: {0:0.4f}\n".format(loss.data.item()))
+    rfile.write("Run device: {0}\n".format(run_device))
     rfile.write('\n')
     rfile.write('Accuracy of the network on the 10000 test images: {0:0.1f}%\n'.format(float(100 * correct) / total))
     rfile.write('\n')

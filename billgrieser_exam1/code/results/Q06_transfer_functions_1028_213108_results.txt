@@ -1,0 +1,33 @@
+Net(
+  (layer_01): Linear(in_features=3072, out_features=1000, bias=True)
+  (output_layer): Linear(in_features=1000, out_features=10, bias=True)
+)
+
+Hidden Layer sizes: [(1000,)]
+Total network weights + biases: 3083010
+Epochs: 4
+Learning rate: 0.005
+Optimizer: Adagrad (
+Parameter Group 0
+    initial_accumulator_value: 0
+    lr: 0.005
+    lr_decay: 0
+    weight_decay: 0
+)
+Batch Size: 250
+Final loss: 1.4153
+Run device: cpu
+Training run duration (secs): 85.6
+
+Accuracy of the network on the 10000 test images: 46.1%
+
+Accuracy of airplane   : 53.1%
+Accuracy of automobile : 58.4%
+Accuracy of bird       : 22.0%
+Accuracy of cat        : 32.3%
+Accuracy of deer       : 39.4%
+Accuracy of dog        : 31.9%
+Accuracy of frog       : 63.7%
+Accuracy of horse      : 47.9%
+Accuracy of ship       : 61.8%
+Accuracy of truck      : 50.3%

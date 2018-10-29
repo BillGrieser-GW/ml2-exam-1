@@ -1,0 +1,29 @@
+Net(
+  (layer_01): Linear(in_features=3072, out_features=300, bias=True)
+  (layer_02): Linear(in_features=300, out_features=50, bias=True)
+  (layer_03): Linear(in_features=50, out_features=50, bias=True)
+  (layer_04): Linear(in_features=50, out_features=50, bias=True)
+  (output_layer): Linear(in_features=50, out_features=10, bias=True)
+)
+
+Hidden Layer sizes: [(500, 100, 50), (300, 50, 50, 50)]
+Total network weights + biases: 942560
+Epochs: 4
+Learning rate: 0.005
+Batch Size: 250
+Final loss: 2.2959
+Run device: cpu
+Training run duration (secs): -43.8
+
+Accuracy of the network on the 10000 test images: 16.7%
+
+Accuracy of airplane   : 37.0%
+Accuracy of automobile : 22.0%
+Accuracy of bird       : 56.6%
+Accuracy of cat        : 0.0%
+Accuracy of deer       : 0.0%
+Accuracy of dog        : 0.0%
+Accuracy of frog       : 51.2%
+Accuracy of horse      : 0.0%
+Accuracy of ship       : 0.0%
+Accuracy of truck      : 0.0%

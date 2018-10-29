@@ -1,9 +1,9 @@
 # =============================================================================
-# Question 1
+# Question 4
 #
-# Fix bugs, supply initial values for tunables, explore performance
-#
-# The data is located in a folder at the same level as  "code"
+# Try several archictures of neurons in layers. The code to build a 
+# network is modified to accept a variable number of layers, and then
+# several runs are performed.
 #
 # =============================================================================
 
@@ -27,12 +27,21 @@ import datetime
 # 
 CHANNELS = 3
 input_size = (CHANNELS * 32 * 32) # 3 color 32x32 images
-hidden_size = 500
+hidden_size = (500, 40, 40)
 num_classes = 10
 num_epochs = 200
 batch_size = 250
-learning_rate = .01
+learning_rate = .005
 
+FORCE_CPU = False
+
+if torch.cuda.is_available() and FORCE_CPU != True:
+    print("Using cuda device for Torch")
+    run_device = torch.device('cuda')
+else:
+    print("Using CPU devices for Torch.")
+    run_device = torch.device('cpu')
+    
 # =============================================================================
 # Load training and test data
 # =============================================================================
@@ -54,28 +63,6 @@ test_loader = torch.utils.data.DataLoader(test_set, batch_size=batch_size, shuff
 classes = ('airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 # =============================================================================
-# Show a sample of the data
-# =============================================================================
-# --------------------------------------------------------------------------------------------
-def imshow(img):
-    img = img / 2 + 0.5
-    npimg = img.numpy()
-    plt.imshow(np.transpose(npimg, (1, 2, 0)))
-    plt.show()  # Show it now
-
-# --------------------------------------------------------------------------------------------
-# Show some sample images
-dataiter = iter(train_loader)
-images, labels = dataiter.next()
-
-# Just show a small grid to start with their labels
-print("A sample of the data.")
-imshow(torchvision.utils.make_grid(images[:16], nrow=4, normalize=False))
-print("Labels:")
-print(''.join('{0:10s}'.format(classes[labels[j]]) + ('\n' if (j+1) % 4 == 0 else ' ') for j in range(16)))
-print()
-
-# =============================================================================
 # Set up the network
 # =============================================================================
 # --------------------------------------------------------------------------------------------
@@ -86,32 +73,29 @@ print()
 class Net(nn.Module):
     def __init__(self, input_size, hidden_size, num_classes):
         super(Net, self).__init__()
-        self.fc1 = nn.Linear(input_size, hidden_size)
-        self.relu = nn.ReLU()
-        self.fc2 = nn.Linear(hidden_size, num_classes)
+        
+        last_in = input_size
+        self.hidden_layers = []
+       
+        for idx, sz in enumerate(hidden_size):
+            new_module = nn.Linear(last_in, sz)
+            self.add_module('layer' + str(idx), new_module)
+            self.hidden_layers.append((new_module, nn.ReLU()))
+            last_in = sz
+        
+        # Add the output layer (with an implied purelin activation)
+        self.output_layer = nn.Linear(last_in, num_classes)
 
     def forward(self, x):
-        out = self.fc1(x)
-        out = self.relu(out)
-        out = self.fc2(out)
+        out = x
+        for layer, transfer in self.hidden_layers:
+            out = layer(out)
+            out = transfer(out)
+        
+        # Output layer
+        out = self.output_layer(out)
         return out
     
-# Define a an alternate model class for comparison that uses
-# Softmax for the second-layer transfer function
-class NetAlt(nn.Module):
-    def __init__(self, input_size, hidden_size, num_classes):
-        super(NetAlt, self).__init__()
-        self.fc1 = nn.Linear(input_size, hidden_size)
-        self.relu = nn.ReLU()
-        self.fc2 = nn.Linear(hidden_size, num_classes)
-        self.softmax = nn.Softmax(dim=1)
-
-    def forward(self, x):
-        out = self.fc1(x)
-        out = self.relu(out)
-        out = self.fc2(out)
-        out = self.softmax(out)
-        return out
 # --------------------------------------------------------------------------------------------
 def get_total_parms(module):
     
@@ -127,8 +111,13 @@ torch.manual_seed(267)
 # Choose the right argument for x
         
 # Instantiate a model
-net = Net(input_size, hidden_size, num_classes)
+net = Net(input_size, hidden_size, num_classes).to(device=run_device)
 print(net)
+
+#STORED_MODEL = os.path.join("results", "Q04_layer_sizes_1028_213155.pkl")
+#net.load_state_dict(torch.load(STORED_MODEL))
+#print("Loading from: ", STORED_MODEL)
+
 total_net_parms = get_total_parms(net)
 print ("Total trainable parameters:", total_net_parms)
 
@@ -147,7 +136,9 @@ for epoch in range(num_epochs):
 
         images, labels = data
         images= images.view(-1, CHANNELS * 32 * 32)
-        images, labels = Variable(images), Variable(labels)
+        # Put the images and labels in tensors on the run device
+        images= Variable(images).to(device=run_device)
+        labels= Variable(labels).to(device=run_device)
         optimizer.zero_grad()
         outputs = net(images)
         loss = criterion(outputs, labels)
@@ -162,30 +153,29 @@ for epoch in range(num_epochs):
 # Display results summary
 # =============================================================================
 # --------------------------------------------------------------------------------------------
-# There is bug here find it and fix it
 correct = 0
 total = 0
 for images, labels in test_loader:
-    images = Variable(images.view(-1, CHANNELS * 32 * 32))
+    images = Variable(images.view(-1, CHANNELS * 32 * 32)).to(device=run_device)
     outputs = net(images)
     _, predicted = torch.max(outputs.data, 1)
     total += labels.size(0)
-    correct += (predicted == labels).sum()
+    
+    # Bring the predicted values to the CPU to compare against the labels
+    correct += (predicted.cpu() == labels).sum()
 
 print('Accuracy of the network on the 10000 test images: {0:0.1f}%'.format(float(100 * correct) / total))
-# --------------------------------------------------------------------------------------------
-_, predicted = torch.max(outputs.data, 1)
-print('Predicted: ', ' '.join('%5s' % classes[predicted[j]] for j in range(4)))
+
 # --------------------------------------------------------------------------------------------
 # There is bug here find it and fix it
 class_correct = list(0. for i in range(num_classes))
 class_total = list(0. for i in range(num_classes))
 for data in test_loader:
     images, labels = data
-    images = Variable(images.view(-1, CHANNELS * 32 * 32))
+    images = Variable(images.view(-1, CHANNELS * 32 * 32)).to(device=run_device)
     outputs = net(images)
     _, predicted = torch.max(outputs.data, 1)
-    c = (predicted == labels)
+    c = (predicted.cpu() == labels)
     for i in range(len(c)):
         label = labels[i]
         class_correct[label] += c[i].int()
@@ -210,7 +200,7 @@ if sys.argv[0] != '':
     run_base = os.path.basename(sys.argv[0])
     run_base = os.path.join(os.path.splitext(run_base)[0])
     
-run_base=os.path.join('results', run_base)
+run_base    =os.path.join('results', run_base)
 
 # Save run artifacts
 torch.save(net.state_dict(), run_base + suffix + '.pkl')
@@ -218,11 +208,13 @@ torch.save(net.state_dict(), run_base + suffix + '.pkl')
 with open(run_base + suffix + '_results.txt', 'w') as rfile:
     rfile.write(str(net))
     rfile.write('\n\n')
+    rfile.write("Hidden Layer sizes: {0}\n".format(hidden_size))
     rfile.write("Total network weights + biases: {0}\n".format(total_net_parms))
     rfile.write("Epochs: {0}\n".format(num_epochs))
     rfile.write("Learning rate: {0}\n".format(learning_rate))
     rfile.write("Batch Size: {0}\n".format(batch_size))
     rfile.write("Final loss: {0:0.4f}\n".format(loss.data.item()))
+    rfile.write("Run device: {0}\n".format(run_device))
     rfile.write('\n')
     rfile.write('Accuracy of the network on the 10000 test images: {0:0.1f}%\n'.format(float(100 * correct) / total))
     rfile.write('\n')
