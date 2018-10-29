@@ -29,11 +29,11 @@ import datetime
 # 
 CHANNELS = 3
 input_size = (CHANNELS * 32 * 32) # 3 color 32x32 images
-hidden_size = 500
+hidden_size = 1000
 num_classes = 10
 num_epochs = 200
-batch_size = 250
-learning_rate = .01
+batch_size = 32
+learning_rate = .005
 
 FORCE_CPU = False
 

@@ -30,11 +30,10 @@ input_size = (CHANNELS * 32 * 32) # 3 color 32x32 images
 #hidden_size = [(400, 200, 50), (400, 400, 100, 100)]
 hidden_size = [(1000,)]
 optimizers = [torch.optim.Adagrad]
-#transfer_functions = [nn.ReLU, nn.PReLU, nn.Sigmoid, nn.Tanh, nn.Hardtanh ]
-transfer_functions = [nn.ReLU, nn.Tanh]
+transfer_functions = [nn.ReLU, nn.PReLU, nn.Sigmoid, nn.Tanh, nn.Hardtanh ]
 num_classes = 10
-num_epochs = 2
-batch_size = 250
+num_epochs = 200
+batch_size = 32
 learning_rate = .005
 
 FORCE_CPU = False

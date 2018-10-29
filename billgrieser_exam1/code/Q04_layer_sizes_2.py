@@ -22,9 +22,9 @@ import time
 CHANNELS = 3
 input_size = (CHANNELS * 32 * 32) # 3 color 32x32 images
 #hidden_size = [(400, 200, 50), (400, 400, 100, 100)]
-hidden_size = [(1500,),(500,), (1000,)]
+hidden_size = [(1500,),(500,),(1000,), (800,200,200,50), (600,300,300), (900, 100, 200)]
 num_classes = 10
-num_epochs = 20
+num_epochs = 300
 batch_size = 32
 learning_rate = .005
 

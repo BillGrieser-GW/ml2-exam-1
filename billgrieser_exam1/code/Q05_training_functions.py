@@ -29,7 +29,7 @@ CHANNELS = 3
 input_size = (CHANNELS * 32 * 32) # 3 color 32x32 images
 #hidden_size = [(400, 200, 50), (400, 400, 100, 100)]
 hidden_size = [(1000,), (500, 500, 500)]
-optimizers = [torch.optim.SGD,torch.optim.Adagrad, torch.optim.Adam, 
+optimizers = [torch.optim.SGD, torch.optim.Adagrad, torch.optim.Adam,
               torch.optim.Rprop]
 num_classes = 10
 num_epochs = 200

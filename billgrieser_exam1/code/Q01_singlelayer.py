@@ -31,7 +31,7 @@ hidden_size = 500
 num_classes = 10
 num_epochs = 200
 batch_size = 250
-learning_rate = .01
+learning_rate = .005
 
 # =============================================================================
 # Load training and test data
