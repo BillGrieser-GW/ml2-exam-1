@@ -32,7 +32,7 @@ hidden_size = [(1000,)]
 optimizers = [torch.optim.Adagrad]
 transfer_functions = [nn.ReLU, nn.PReLU, nn.Sigmoid, nn.Tanh, nn.Hardtanh ]
 num_classes = 10
-num_epochs = 200
+num_epochs = 50
 batch_size = 32
 learning_rate = .005
 
