@@ -24,7 +24,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 # For classification report
-from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import classification_report
 
 # --------------------------------------------------------------------------------------------
 # Choose the right values for x.
@@ -35,12 +35,12 @@ from sklearn.metrics import classification_report, confusion_matrix
 # 
 CHANNELS = 3
 input_size = (CHANNELS * 32 * 32) # 3 color 32x32 images
-hidden_size = [(1000,)]
+hidden_size = [(1500,)]
 optimizers = [torch.optim.Adagrad]
 transfer_functions = [nn.ReLU]
-dropout= [0.2]
+dropout= [0.5]
 num_classes = 10
-num_epochs = 200
+num_epochs = 0
 batch_size = 32
 learning_rate = .005
 
@@ -128,7 +128,7 @@ class Net(nn.Module):
 # =============================================================================
 # Function to make a training run and return the trained network
 # =============================================================================
-def make_training_run(this_hidden_size, learning_rate, run_device, 
+def make_model(this_hidden_size, learning_rate, run_device, 
                       criterion=nn.CrossEntropyLoss(), 
                       optimizer_function=torch.optim.SGD,
                       transfer_function=nn.ReLU, dropout=0.0):
@@ -136,6 +136,7 @@ def make_training_run(this_hidden_size, learning_rate, run_device,
     # Fixed manual seed
     torch.manual_seed(267)
     start_time = time.time()
+    loss=None
     
     # Instantiate a model
     net = Net(input_size, this_hidden_size, num_classes, transfer_function=transfer_function,
@@ -143,9 +144,9 @@ def make_training_run(this_hidden_size, learning_rate, run_device,
     print(net)
     net.train()
     
-    #STORED_MODEL = os.path.join("results", "Q04_layer_sizes_1028_213155.pkl")
-    #net.load_state_dict(torch.load(STORED_MODEL))
-    #print("Loading from: ", STORED_MODEL)
+    STORED_MODEL = os.path.join("results", "Q08_dropout_1029_181713.pkl")
+    net.load_state_dict(torch.load(STORED_MODEL,map_location=run_device))
+    print("Loading from: ", STORED_MODEL)
     
     total_net_parms = get_total_parms(net)
     print ("Total trainable parameters:", total_net_parms)
@@ -176,87 +177,11 @@ def make_training_run(this_hidden_size, learning_rate, run_device,
                 print('Epoch [%d/%d], Step [%d/%d], Loss: %.4f'
                       % (epoch + 1, num_epochs, i + 1, len(train_set) // batch_size, loss.data.item()))
                 
-    return net, loss, time.time() - start_time, optimizer, transfer_function
+    return net, time.time() - start_time
       
 # =============================================================================
 # Display results summary
 # =============================================================================
-def record_test_results(net, run_device, loss, duration, optimizer, 
-                        transfer_function):
-    net.train(False)
-    correct = 0
-    total = 0
-    
-    print("Training run duration (secs): {0:0.1f}\n".format(duration))
-    
-    for images, labels in test_loader:
-        images = Variable(images.view(-1, CHANNELS * 32 * 32)).to(device=run_device)
-        outputs = net(images)
-        _, predicted = torch.max(outputs.data, 1)
-        total += labels.size(0)
-        
-        # Bring the predicted values to the CPU to compare against the labels
-        correct += (predicted.cpu() == labels).sum()
-    
-    print('Accuracy of the network on the 10000 test images: {0:0.1f}%'.format(float(100 * correct) / total))
-
-    class_correct = list(0. for i in range(num_classes))
-    class_total = list(0. for i in range(num_classes))
-    for data in test_loader:
-        images, labels = data
-        images = Variable(images.view(-1, CHANNELS * 32 * 32)).to(device=run_device)
-        outputs = net(images)
-        _, predicted = torch.max(outputs.data, 1)
-        c = (predicted.cpu() == labels)
-        for i in range(len(c)):
-            label = labels[i]
-            class_correct[label] += c[i].int()
-            class_total[label] += 1
-    
-    # --------------------------------------------------------------------------------------------
-    for i in range(num_classes):
-        print('Accuracy of {0:10s} : {1:0.1f}%'.format(classes[i], float(100 * class_correct[i]) / class_total[i]))
-        
-    # =============================================================================
-    # Save results to a file for comparison purposes.
-    # =============================================================================
-    now = datetime.datetime.now()
-    suffix = "_" + now.strftime('%m%d_%H%M%S')
-    
-    if not os.path.exists('results'):
-        os.makedirs('results')
-        
-    run_base='console'
-    
-    if sys.argv[0] != '':
-        run_base = os.path.basename(sys.argv[0])
-        run_base = os.path.join(os.path.splitext(run_base)[0])
-        
-    run_base = os.path.join('results', run_base)
-    
-    # Save run artifacts
-    torch.save(net.state_dict(), run_base + suffix + '.pkl')
-    
-    with open(run_base + suffix + '_results.txt', 'w') as rfile:
-        rfile.write(str(net))
-        rfile.write('\n\n')
-        rfile.write("Hidden Layer sizes: {0}\n".format(hidden_size))
-        rfile.write("Total network weights + biases: {0}\n".format(get_total_parms(net)))
-        rfile.write("Epochs: {0}\n".format(num_epochs))
-        rfile.write("Learning rate: {0}\n".format(learning_rate))
-        rfile.write("Optimizer: {0}\n".format(optimizer))
-        rfile.write("Transfer Function: {0}\n".format(transfer_function))
-        rfile.write("Batch Size: {0}\n".format(batch_size))
-        rfile.write("Final loss: {0:0.4f}\n".format(loss.data.item()))
-        rfile.write("Run device: {0}\n".format(run_device))
-        rfile.write("Training run duration (secs): {0:0.1f}\n".format(duration))
-        
-        rfile.write('\n')
-        rfile.write('Accuracy of the network on the 10000 test images: {0:0.1f}%\n'.format(float(100 * correct) / total))
-        rfile.write('\n')
-        for i in range(num_classes):
-            rfile.write('Accuracy of {0:10s} : {1:0.1f}%\n'.format(classes[i], float(100 * class_correct[i]) / class_total[i]))
-#%%
 def show_confusion_matrix(net, run_device):
     
     # x is predicted
@@ -316,16 +241,13 @@ if __name__ == "__main__":
             for tran in transfer_functions:
                 for drop in dropout:
             
-                    # Make a run
-                    net, loss, duration, optimizer, transfer_function = make_training_run(arch, 
-                                                  learning_rate=learning_rate, 
-                                                  run_device=run_device, 
-                                                  optimizer_function=opt,
-                                                  transfer_function=tran,
-                                                  dropout=drop)
+                    # Make a model and then run the test data through it
+                    net, duration = make_model(arch, 
+                                          learning_rate=learning_rate, 
+                                          run_device=run_device, 
+                                          optimizer_function=opt,
+                                          transfer_function=tran,
+                                          dropout=drop)
                     
-                    # Show/Store the results
-                    record_test_results(net, run_device, loss, duration, optimizer, transfer_function)
-#%%
                     # Confusion Matrix
                     c_matrix = show_confusion_matrix(net, run_device)

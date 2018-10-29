@@ -1,9 +1,7 @@
 # =============================================================================
-# Question 7
+# Question 9
 #
-# Save gradients with respect to inputs for each run. Make the run
-# using batch gradient descent by setting the batch size to 
-# the size of the input.
+# Make a run using Batch SGD -- update after each epoch.
 #
 # =============================================================================
 
@@ -18,7 +16,6 @@ import torch.nn as nn
 from torch.autograd import Variable
 import datetime
 import time
-
 # --------------------------------------------------------------------------------------------
 # Choose the right values for x.
 
@@ -29,16 +26,16 @@ import time
 CHANNELS = 3
 input_size = (CHANNELS * 32 * 32) # 3 color 32x32 images
 #hidden_size = [(400, 200, 50), (400, 400, 100, 100)]
-hidden_size = [(1500,)]
+hidden_size = [(1500,), ]
 optimizers = [torch.optim.Adagrad]
 transfer_functions = [nn.ReLU]
+dropout= [0.5]
 num_classes = 10
-num_epochs = 4
-batch_size = 5000
+num_epochs = 50
+batch_size = 50000
 learning_rate = .005
 
 FORCE_CPU = False
-SAVE_GRADS = True
 
 if torch.cuda.is_available() and FORCE_CPU != True:
     print("Using cuda device for Torch")
@@ -62,7 +59,7 @@ train_set = torchvision.datasets.CIFAR10(root=DATA_ROOT, train=True, download=Tr
 train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True)
 
 test_set = torchvision.datasets.CIFAR10(root=DATA_ROOT, train=False, download=True, transform=transform)
-test_loader = torch.utils.data.DataLoader(test_set, batch_size=batch_size, shuffle=False)
+test_loader = torch.utils.data.DataLoader(test_set, batch_size=1000, shuffle=False)
 
 # Find the right classes name. Save it as a tuple of size 10.
 classes = ('airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
@@ -89,17 +86,19 @@ def get_total_parms(module):
 # =============================================================================
 class Net(nn.Module):
     def __init__(self, input_size, hidden_size, num_classes, 
-                 transfer_function=nn.ReLU):
+                 transfer_function=nn.ReLU, dropout=0.0):
         super(Net, self).__init__()
         
         last_in = input_size
         self.hidden_layers = []
-       
+        
         for idx, sz in enumerate(hidden_size):
             new_module = nn.Linear(last_in, sz)
             self.add_module("layer_{0:02d}".format(idx+1), new_module)
-            self.hidden_layers.append((new_module, transfer_function()))
+            self.hidden_layers.append((new_module, transfer_function()))    
             last_in = sz
+            
+        self.dropout_layer=nn.Dropout(dropout)
         
         # Add the output layer (with an implied purelin activation)
         self.output_layer = nn.Linear(last_in, num_classes)
@@ -110,38 +109,30 @@ class Net(nn.Module):
             out = layer(out)
             out = transfer(out)
         
+        # Dropout
+        out = self.dropout_layer(out)
+        
         # Output layer
         out = self.output_layer(out)
         return out
 
-def printgradnorm(self, grad_input, grad_output):
-    
-    print('')
-    print('grad_input: ', type(grad_input))
-    print('grad_input[0]: ', type(grad_input[0]))
-    print('grad_output: ', type(grad_output))
-    print('grad_output[0]: ', type(grad_output[0]))
-    print('')
-    print('grad_input size:', grad_input[0].size())
-    print('grad_output size:', grad_output[0].size())
-    print('grad_input norm:', grad_input[0].norm())
-    
 # =============================================================================
 # Function to make a training run and return the trained network
 # =============================================================================
 def make_training_run(this_hidden_size, learning_rate, run_device, 
                       criterion=nn.CrossEntropyLoss(), 
                       optimizer_function=torch.optim.SGD,
-                      transfer_function=nn.ReLU):
+                      transfer_function=nn.ReLU, dropout=0.0):
 
     # Fixed manual seed
     torch.manual_seed(267)
     start_time = time.time()
     
     # Instantiate a model
-    net = Net(input_size, this_hidden_size, num_classes, transfer_function=transfer_function).to(device=run_device)
+    net = Net(input_size, this_hidden_size, num_classes, transfer_function=transfer_function,
+              dropout=dropout).to(device=run_device)
     print(net)
-    net.train(True)
+    net.train()
     
     #STORED_MODEL = os.path.join("results", "Q04_layer_sizes_1028_213155.pkl")
     #net.load_state_dict(torch.load(STORED_MODEL))
@@ -154,11 +145,11 @@ def make_training_run(this_hidden_size, learning_rate, run_device,
     print ("Optimizer:", optimizer)
     print ("Transfer function:", transfer_function)
      
-    saved_grads = []
-        
     # =============================================================================
-    # Make a run 
+    # Make a run
     # =============================================================================
+    # --------------------------------------------------------------------------------------------
+    # There is bug here find it and fix it
     for epoch in range(num_epochs):
         for i, data in enumerate(train_loader):
     
@@ -167,22 +158,17 @@ def make_training_run(this_hidden_size, learning_rate, run_device,
             # Put the images and labels in tensors on the run device
             images= Variable(images).to(device=run_device)
             labels= Variable(labels).to(device=run_device)
-            images.requires_grad_(True)
-         
             optimizer.zero_grad()
             outputs = net(images)
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
-
-            if SAVE_GRADS:
-                grads = images.grad.cpu()
-                saved_grads.append(grads)
             
-        print('Epoch [%d/%d], Loss: %.4f'
-              % (epoch + 1, num_epochs, loss.data.item()))
-
-    return net, loss, time.time() - start_time, optimizer, transfer_function, images, saved_grads
+            if (i + 1) % 100 == 0:
+                print('Epoch [%d/%d], Step [%d/%d], Loss: %.4f'
+                      % (epoch + 1, num_epochs, i + 1, len(train_set) // batch_size, loss.data.item()))
+                
+    return net, loss, time.time() - start_time, optimizer, transfer_function
       
 # =============================================================================
 # Display results summary
@@ -272,34 +258,17 @@ if __name__ == "__main__":
     for arch in hidden_size:
         for opt in optimizers:
             for tran in transfer_functions:
+                for drop in dropout:
             
-                # Make a run
-                net, loss, duration, optimizer, transfer_function, images_asrun, saved_grads = make_training_run(arch, 
-                                              learning_rate=learning_rate, 
-                                              run_device=run_device, 
-                                              optimizer_function=opt,
-                                              transfer_function=tran)
-
-                # Show/Store the results
-                record_test_results(net, run_device, loss, duration, optimizer, transfer_function)
-        
-                # Print info about input grads
-                all_grads = np.vstack(saved_grads)
-                
-                print("\nCalculating standard deviation of the gradients of all the input features:")
-                stds = all_grads.std(axis=0)
-        
-                top_10 = sorted(range(len(stds)), key=lambda x: stds[x], reverse=True)[:10]
-                print ("Top 10 inputs by standard deviation of input wrt loss:")
-                
-                for i in range(10):
-                    print("   Index {0:5d}: Standard Deviation: {1}".format(top_10[i], stds[top_10[i]]))
+                    # Make a run
+                    net, loss, duration, optimizer, transfer_function = make_training_run(arch, 
+                                                  learning_rate=learning_rate, 
+                                                  run_device=run_device, 
+                                                  optimizer_function=opt,
+                                                  transfer_function=tran,
+                                                  dropout=drop)
                     
-                # Write to file
-                print("\n\nSaving saved grads of shape:", all_grads.shape)
-                np.savetxt("Q07_gradients.csv", all_grads)
-                print("Done Saving saved grads of shape:", all_grads.shape)
-                    
-                
-                
+                    # Show/Store the results
+                    record_test_results(net, run_device, loss, duration, optimizer, transfer_function)
+        
         
