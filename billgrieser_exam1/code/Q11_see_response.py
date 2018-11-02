@@ -21,10 +21,9 @@ import matplotlib.pyplot as plt
 # --------------------------------------------------------------------------------------------
 # Choose the right values for x.
 
-#
-# Initially try a network with a single hidden layer of 500 neurons
-# and a moderate
-# 
+# Identify the model to evaluate
+STORED_MODEL = os.path.join("results", "best_model.pkl")
+
 CHANNELS = 3
 input_size = (CHANNELS * 32 * 32) # 3 color 32x32 images
 hidden_size = [(1500,), ]
@@ -131,7 +130,6 @@ def make_model(this_hidden_size, run_device,
     print(net)
     net.train(True)
     
-    STORED_MODEL = os.path.join("results", "Q08_dropout_1029_181713.pkl")
     net.load_state_dict(torch.load(STORED_MODEL, map_location=run_device))
     print("Loading from: ", STORED_MODEL)
     

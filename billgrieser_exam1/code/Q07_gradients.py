@@ -17,22 +17,18 @@ import torch.nn as nn
 from torch.autograd import Variable
 import datetime
 import time
+import matplotlib.pyplot as plt
 
+STORED_MODEL = os.path.join("results", "best_model.pkl")
 
-# Choose the right values for x.
-
-#
-# Initially try a network with a single hidden layer of 500 neurons
-# and a moderate
-# 
 CHANNELS = 3
 input_size = (CHANNELS * 32 * 32) # 3 color 32x32 images
-hidden_size = [(1000,)]
+hidden_size = [(1500,)]
 optimizers = [torch.optim.Adagrad]
-transfer_functions = [nn.ReLU]
+transfer_functions = [nn.LeakyReLU]
 num_classes = 10
 num_epochs = 1
-batch_size = 5000
+batch_size = 32
 learning_rate = .005
 
 FORCE_CPU = False
@@ -146,8 +142,7 @@ def make_training_run(this_hidden_size, learning_rate, run_device,
     print(net)
     net.train(True)
     
-    STORED_MODEL = os.path.join("results", "Q04_layer_sizes_2_1028_213155.pkl")
-    net.load_state_dict(torch.load(STORED_MODEL))
+    net.load_state_dict(torch.load(STORED_MODEL, map_location=run_device))
     print("Loading from: ", STORED_MODEL)
     
     total_net_parms = get_total_parms(net)
@@ -271,38 +266,43 @@ def record_test_results(net, run_device, loss, duration, optimizer,
 # =============================================================================
 if __name__ == "__main__":
     
-    # Process each architecture in the list of trials
-    for arch in hidden_size:
-        for opt in optimizers:
-            for tran in transfer_functions:
-            
-                # Make a run
-                net, loss, duration, optimizer, transfer_function, images_asrun, saved_grads = make_training_run(arch, 
-                                              learning_rate=learning_rate, 
-                                              run_device=run_device, 
-                                              optimizer_function=opt,
-                                              transfer_function=tran)
+    # Make a model
+    
+    # Make a run
+    net, loss, duration, optimizer, transfer_function, images_asrun, saved_grads = \
+        make_training_run(hidden_size[0], 
+                          learning_rate=learning_rate, 
+                          run_device=run_device, 
+                          optimizer_function=optimizers[0],
+                          transfer_function=transfer_functions[0])
 
-                # Show/Store the results
-                record_test_results(net, run_device, loss, duration, optimizer, transfer_function)
+    # Show/Store the results
+    record_test_results(net, run_device, loss, duration, optimizer, transfer_function)
+
+    # Print info about input grads
+    all_grads = np.vstack(saved_grads)
+    
+    print("\nCalculating standard deviation of the gradients of all the input features:")
+    stds = all_grads.std(axis=0)
+
+    top_10 = sorted(range(len(stds)), key=lambda x: stds[x], reverse=False)[:10]
+    print ("Top 10 inputs by standard deviation of input wrt loss:")
+    
+    for i in range(10):
+        print("   Index {0:5d}: Standard Deviation: {1}".format(top_10[i], stds[top_10[i]]))
         
-                # Print info about input grads
-                all_grads = np.vstack(saved_grads)
-                
-                print("\nCalculating standard deviation of the gradients of all the input features:")
-                stds = all_grads.std(axis=0)
-        
-                top_10 = sorted(range(len(stds)), key=lambda x: stds[x], reverse=True)[:10]
-                print ("Top 10 inputs by standard deviation of input wrt loss:")
-                
-                for i in range(10):
-                    print("   Index {0:5d}: Standard Deviation: {1}".format(top_10[i], stds[top_10[i]]))
-                    
-                # Write to file
-                print("\n\nSaving saved grads of shape:", all_grads.shape)
-                np.savetxt("Q07_gradients.csv", all_grads)
-                print("Done Saving saved grads of shape:", all_grads.shape)
-                    
-                
-                
+    # Write to file
+    #print("\n\nSaving saved grads of shape:", all_grads.shape)
+    #np.savetxt("Q07_gradients.csv", all_grads)
+    #print("Done Saving saved grads of shape:", all_grads.shape)
+#%%
+    def imshow(ax, img):
+        npimg = img / 2 + 0.5
+        #npimg = img.numpy()
+        ax.imshow(np.transpose(npimg, (1, 2, 0)))          
+    
+    f, ax = plt.subplots(figsize=(6,7))
+    f.suptitle("Pixel gradient hotspots")  
+
+    imshow(ax, stds)          
         

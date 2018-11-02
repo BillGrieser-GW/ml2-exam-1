@@ -5,15 +5,12 @@ Created on Thu Nov  1 16:10:35 2018
 @author: billg_000
 """
 import os
-import sys
 import torch
 import torchvision
 import torchvision.transforms as transforms
 import numpy as np
 import torch.nn as nn
 from torch.autograd import Variable
-import datetime
-import time
 import matplotlib.pyplot as plt
 
 batch_size = 50
@@ -59,7 +56,6 @@ for xgrid in range(4):
     for ygrid in range(4):
         ax[xgrid, ygrid].tick_params(axis='both', which = 'both', bottom=False, left=False, tick1On=False, tick2On=False,
           labelbottom=False, labelleft=False)
-        # ax[xgrid, ygrid].set_title(str(xgrid) + ", " + str(ygrid), fontsize=9)
         imshow(ax[xgrid, ygrid], images[next_idx])
         ax[xgrid, ygrid].set_title(classes[labels[next_idx]], fontsize=10)
         next_idx+=1

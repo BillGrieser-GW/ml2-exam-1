@@ -1,9 +1,7 @@
 # =============================================================================
-# Question 4
+# Question 10
 #
-# Try several archictures of neurons in layers. The code to build a 
-# network is modified to accept a variable number of layers, and then
-# several runs are performed.
+# Load a model and show its confusion matrix versus the test data
 #
 # =============================================================================
 
@@ -18,26 +16,17 @@ from torch.autograd import Variable
 import time
 
 # For heatmap
-import seaborn as sns
 import matplotlib.pyplot as plt
-import matplotlib
 
 # For classification report
 from sklearn.metrics import classification_report
 
-# --------------------------------------------------------------------------------------------
-# Choose the right values for x.
-
-#
-# Initially try a network with a single hidden layer of 500 neurons
-# and a moderate
-# 
 # Identify the model to evaluate
-STORED_MODEL = os.path.join("results", "Q08_dropout_1102_181959.pkl")
+STORED_MODEL = os.path.join("results", "best_model.pkl")
 
 CHANNELS = 3
 input_size = (CHANNELS * 32 * 32) # 3 color 32x32 images
-hidden_size = [(900,300,)]
+hidden_size = [(1500,)]
 optimizers = [torch.optim.Adagrad]
 transfer_functions = [nn.LeakyReLU]
 dropout= [0.5]
@@ -183,6 +172,7 @@ def show_evaluation_metrics(net, run_device):
     # This uses Seaborn, which gives a nice plot; however, our cloud instances
     # don't have the latest version of matplotlib and this code displays the
     # confusion matrix without the counts instead of including them.
+    # import seaborn as sns
     # fig, ax = plt.subplots(figsize=(9, 6))
     # plt.title("Confusion Matrix", fontsize=16)
     # sns.set(font_scale=1.0)  # Label size
@@ -196,7 +186,7 @@ def show_evaluation_metrics(net, run_device):
     # plt.show()
     
     # This draws a confusion matrix using just matplotlib
-    fig, ax = plt.subplots(figsize=(7, 7))
+    fig, ax = plt.subplots(figsize=(8, 7))
    
     # Draw the grid squares and color them based on the value of the underlying measure
     ax.matshow(c_matrix, cmap=plt.cm.Blues, alpha=0.6)
