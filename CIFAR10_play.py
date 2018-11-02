@@ -132,3 +132,7 @@ for i in range(10):
 #%%
 # --------------------------------------------------------------------------------------------
 torch.save(net.state_dict(), './model_cpu.pkl')
+
+with open(os.path.join('results', 'summary.csv'), 'a') as sfile:
+    sfile.write(','.join((run_base, "'" + str(arch) + "'", "{0:0.1f}".format(acc), "{0:0.4f}".format(loss.data.item()),
+                          str(num_epochs), str(learning_rate), str(batch_size),)))

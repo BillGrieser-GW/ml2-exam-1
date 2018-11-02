@@ -32,7 +32,7 @@ hidden_size = [(1000,), (500, 500, 500)]
 optimizers = [torch.optim.SGD, torch.optim.Adagrad, torch.optim.Adam,
               torch.optim.Rprop]
 num_classes = 10
-num_epochs = 200
+num_epochs = 50
 batch_size = 32
 learning_rate = .005
 

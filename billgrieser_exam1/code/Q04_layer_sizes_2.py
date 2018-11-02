@@ -21,8 +21,8 @@ import time
 
 CHANNELS = 3
 input_size = (CHANNELS * 32 * 32) # 3 color 32x32 images
-#hidden_size = [(400, 200, 50), (400, 400, 100, 100)]
-hidden_size = [(1500,),(500,),(1000,), (800,200,200,50), (600,300,300), (900, 100, 200)]
+hidden_size = [(900, 200, 100), (900, 300)]
+#hidden_size = [(1500,),(500,),(1000,), (800,200,200,50), (600,300,300), (900, 100, 200), (900, 200, 100), (900, 300)]
 num_classes = 10
 num_epochs = 50
 batch_size = 32
@@ -187,7 +187,7 @@ def make_training_run(this_hidden_size, learning_rate, run_device, criterion=nn.
 # =============================================================================
 # Display results summary
 # =============================================================================
-def record_test_results(net, run_device, loss, duration):
+def record_test_results(net, arch, run_device, loss, duration):
     net.train(False)
     correct = 0
     total = 0
@@ -217,8 +217,7 @@ def record_test_results(net, run_device, loss, duration):
             label = labels[i]
             class_correct[label] += c[i].int()
             class_total[label] += 1
-    
-    # --------------------------------------------------------------------------------------------
+
     for i in range(num_classes):
         print('Accuracy of {0:10s} : {1:0.1f}%'.format(classes[i], float(100 * class_correct[i]) / class_total[i]))
         
@@ -245,7 +244,7 @@ def record_test_results(net, run_device, loss, duration):
     with open(run_base + suffix + '_results.txt', 'w') as rfile:
         rfile.write(str(net))
         rfile.write('\n\n')
-        rfile.write("Hidden Layer sizes: {0}\n".format(hidden_size))
+        rfile.write("Hidden Layer size: {0}\n".format(arch))
         rfile.write("Total network weights + biases: {0}\n".format(get_total_parms(net)))
         rfile.write("Epochs: {0}\n".format(num_epochs))
         rfile.write("Learning rate: {0}\n".format(learning_rate))
@@ -254,11 +253,13 @@ def record_test_results(net, run_device, loss, duration):
         rfile.write("Run device: {0}\n".format(run_device))
         rfile.write("Training run duration (secs): {0:0.1f}\n".format(duration))
         rfile.write('\n')
-        rfile.write('Accuracy of the network on the 10000 test images: {0:0.1f}%\n'.format(float(100 * correct) / total))
+        acc = float(100 * correct) / total
+        rfile.write('Accuracy of the network on the 10000 test images: {0:0.1f}%\n'.format(acc))
         rfile.write('\n')
+
         for i in range(num_classes):
             rfile.write('Accuracy of {0:10s} : {1:0.1f}%\n'.format(classes[i], float(100 * class_correct[i]) / class_total[i]))
-    
+
 # =============================================================================
 # MAIN -- make several runs
 # =============================================================================
@@ -274,7 +275,7 @@ if __name__ == "__main__":
                                           run_device=run_device, use_softmax=use_softmax)
             
             # Show/Store the results
-            record_test_results(net, run_device, loss, duration)
+            record_test_results(net, arch, run_device, loss, duration)
         
         
         

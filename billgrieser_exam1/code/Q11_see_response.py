@@ -234,8 +234,16 @@ def imshow(img, title='One Image'):
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
     plt.title(title)
     plt.show()  # Show it now
+    
+def imshowax(ax, img):
+    img = img / 2 + 0.5
+    npimg = img.numpy()
+    ax.imshow(np.transpose(npimg, (1, 2, 0)))
+    ax.tick_params(axis='both', which = 'both', bottom=False, left=False, tick1On=False, tick2On=False,
+                   labelbottom=False, labelleft=False)
+    
 # =============================================================================
-# MAIN -- make several runs
+# MAIN -- Accept input from the user for test data and results to display
 # =============================================================================
 if __name__ == "__main__":
     
@@ -253,9 +261,10 @@ if __name__ == "__main__":
         _, predicted = torch.max(outputs.data, 1)
         predicted = predicted.cpu()
 
-      
+#%%
+    normalizer = nn.Softmax(dim=1)
     while True:
-        image_idx = input("Enter an index from 0 to 9999 from the test data: ")
+        image_idx = input("Enter an index from 0 to 9999 from the test data (q to quit): ")
         
         try:
             if image_idx.lower() == 'q':
@@ -268,8 +277,23 @@ if __name__ == "__main__":
             image_idx = 0
             
         if image_idx >= 0 and image_idx < 10000:
-            imshow(images[image_idx].reshape(3,32,32), title="Actual: {0} Predicted: {1}".
+            #imshow(images[image_idx].reshape(3,32,32), title="Actual: {0} Predicted: {1}".
+            #       format(classes[labels[image_idx]], classes[int(predicted[image_idx])]))
+            
+            f, ax = plt.subplots(1, 2, figsize=(9.5,3.5))
+            f.suptitle("Actual: {0} Predicted: {1}".
                    format(classes[labels[image_idx]], classes[int(predicted[image_idx])]))
+            imshowax(ax[0], images[image_idx].reshape(3,32,32))
+            y_pos = np.arange(len(classes))
+            ax[1].set_yticks(y_pos)
+            ax[1].set_yticklabels(classes, fontsize=8)
+            
+            softmaxed = normalizer(outputs[image_idx:image_idx+1])[0]
+            
+            ax[1].barh(y_pos, softmaxed, align='center',
+                    color='blue')
+            ax[1].invert_yaxis()
+            plt.show()
 
         
         

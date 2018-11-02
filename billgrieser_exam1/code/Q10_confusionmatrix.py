@@ -9,14 +9,12 @@
 
 # --------------------------------------------------------------------------------------------
 import os
-import sys
 import torch
 import torchvision
 import torchvision.transforms as transforms
 import numpy as np
 import torch.nn as nn
 from torch.autograd import Variable
-import datetime
 import time
 
 # For heatmap

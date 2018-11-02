@@ -13,7 +13,6 @@ import sys
 import torch
 import torchvision
 import torchvision.transforms as transforms
-import matplotlib.pyplot as plt
 import numpy as np
 import torch.nn as nn
 from torch.autograd import Variable
@@ -74,23 +73,6 @@ class Net(nn.Module):
         out = self.fc2(out)
         return out
     
-# Define a an alternate model class for comparison that uses
-# Softmax for the second-layer transfer function
-class NetAlt(nn.Module):
-    def __init__(self, input_size, hidden_size, num_classes):
-        super(NetAlt, self).__init__()
-        self.fc1 = nn.Linear(input_size, hidden_size)
-        self.relu = nn.ReLU()
-        self.fc2 = nn.Linear(hidden_size, num_classes)
-        self.softmax = nn.Softmax(dim=1)
-
-    def forward(self, x):
-        out = self.fc1(x)
-        out = self.relu(out)
-        out = self.fc2(out)
-        out = self.softmax(out)
-        return out
-# --------------------------------------------------------------------------------------------
 def get_total_parms(module):
     
     total_parms = 0
