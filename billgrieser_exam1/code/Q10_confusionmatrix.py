@@ -182,18 +182,18 @@ def show_evaluation_metrics(net, run_device):
 
     # This uses Seaborn, which gives a nice plot; however, our cloud instances
     # don't have the latest version of matplotlib and this code displays the
-    # confusion matrix wiout the counts.
-    fig, ax = plt.subplots(figsize=(9, 6))
-    plt.title("Confusion Matrix", fontsize=16)
-    sns.set(font_scale=1.0)  # Label size
-    sns.heatmap(c_matrix, annot=True, annot_kws={"size": 14}, robust=True, fmt='d', \
-               linecolor='gray', linewidths=0.5, square=False, cbar=True, cmap='Blues',
-               xticklabels=classes, yticklabels=classes) 
-    plt.ylabel('Actual Labels', fontsize=14) 
-    plt.xlabel('Predicted Labels', fontsize=14) 
-    tick_marks = np.arange(len(classes))
-    plt.xticks(tick_marks, classes, rotation=45)           
-    plt.show()
+    # confusion matrix without the counts instead of including them.
+    # fig, ax = plt.subplots(figsize=(9, 6))
+    # plt.title("Confusion Matrix", fontsize=16)
+    # sns.set(font_scale=1.0)  # Label size
+    # sns.heatmap(c_matrix, annot=True, annot_kws={"size": 14}, robust=True, fmt='d', \
+    #            linecolor='gray', linewidths=0.5, square=False, cbar=True, cmap='Blues',
+    #            xticklabels=classes, yticklabels=classes)
+    # plt.ylabel('Actual Labels', fontsize=14)
+    # plt.xlabel('Predicted Labels', fontsize=14)
+    # tick_marks = np.arange(len(classes))
+    # plt.xticks(tick_marks, classes, rotation=45)
+    # plt.show()
     
     # This draws a confusion matrix using just matplotlib
     fig, ax = plt.subplots(figsize=(7, 7))
@@ -224,7 +224,7 @@ def show_evaluation_metrics(net, run_device):
     print("\nClassification Report\n")
     print(classification_report(all_labels, all_predicted, target_names=classes))
     
-    # IN CASE OF EMERGENCY: Uncomment
+    # IN CASE OF EMERGENCY: Uncomment to see a text-only CM
     #print("\nConfusion matrix (non-graphically)\n")
     #print(c_matrix)
     
