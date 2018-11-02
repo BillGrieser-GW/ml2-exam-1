@@ -27,11 +27,10 @@ import time
 # 
 CHANNELS = 3
 input_size = (CHANNELS * 32 * 32) # 3 color 32x32 images
-#hidden_size = [(400, 200, 50), (400, 400, 100, 100)]
-hidden_size = [(1500,), ]
+hidden_size = [(900,300), (1000,), (1500,)]
 optimizers = [torch.optim.Adagrad]
-transfer_functions = [nn.ReLU]
-dropout= [0.0, 0.2, 0.5]
+transfer_functions = [nn.LeakyReLU]
+dropout= [0.2, 0.5]
 num_classes = 10
 num_epochs = 50
 batch_size = 32
@@ -84,6 +83,7 @@ def get_total_parms(module):
 # Define a model class that takes a variable number of hidden layer sizes
 # and contructs a network to match. The network uses ReLu as the transfer
 # function in each hidden layer. It uses purelin on the output layer.
+# It supports a dropout layer inserted before the output layer.
 #
 # =============================================================================
 class Net(nn.Module):

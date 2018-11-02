@@ -1,13 +1,12 @@
 # =============================================================================
 # Question 7
 #
-# Save gradients with respect to inputs for each run. Make the run
-# using batch gradient descent by setting the batch size to 
-# the size of the input.
-#
+# Load a pre-trained model and run one epoch to capture the gradients of 
+# all the inputs for one pass through the data. Save as a CSV
+# a file with the standard deviation of each pixel across the run.
 # =============================================================================
 
-# --------------------------------------------------------------------------------------------
+
 import os
 import sys
 import torch
@@ -19,7 +18,7 @@ from torch.autograd import Variable
 import datetime
 import time
 
-# --------------------------------------------------------------------------------------------
+
 # Choose the right values for x.
 
 #
@@ -28,12 +27,11 @@ import time
 # 
 CHANNELS = 3
 input_size = (CHANNELS * 32 * 32) # 3 color 32x32 images
-#hidden_size = [(400, 200, 50), (400, 400, 100, 100)]
-hidden_size = [(1500,)]
+hidden_size = [(1000,)]
 optimizers = [torch.optim.Adagrad]
 transfer_functions = [nn.ReLU]
 num_classes = 10
-num_epochs = 4
+num_epochs = 1
 batch_size = 5000
 learning_rate = .005
 
@@ -50,7 +48,6 @@ else:
 # =============================================================================
 # Load training and test data
 # =============================================================================
-# --------------------------------------------------------------------------------------------
 # Define a transformation that converts each image to a tensor and normalizes
 # each channel
 transform = transforms.Compose([transforms.ToTensor(), 
@@ -85,21 +82,24 @@ def get_total_parms(module):
 # Define a model class that takes a variable number of hidden layer sizes
 # and contructs a network to match. The network uses ReLu as the transfer
 # function in each hidden layer. It uses purelin on the output layer.
+# It supports a dropout layer inserted before the output layer.
 #
 # =============================================================================
 class Net(nn.Module):
     def __init__(self, input_size, hidden_size, num_classes, 
-                 transfer_function=nn.ReLU):
+                 transfer_function=nn.ReLU, dropout=0.0):
         super(Net, self).__init__()
         
         last_in = input_size
         self.hidden_layers = []
-       
+        
         for idx, sz in enumerate(hidden_size):
             new_module = nn.Linear(last_in, sz)
             self.add_module("layer_{0:02d}".format(idx+1), new_module)
-            self.hidden_layers.append((new_module, transfer_function()))
+            self.hidden_layers.append((new_module, transfer_function()))    
             last_in = sz
+            
+        self.dropout_layer=nn.Dropout(dropout)
         
         # Add the output layer (with an implied purelin activation)
         self.output_layer = nn.Linear(last_in, num_classes)
@@ -109,6 +109,9 @@ class Net(nn.Module):
         for layer, transfer in self.hidden_layers:
             out = layer(out)
             out = transfer(out)
+        
+        # Dropout
+        out = self.dropout_layer(out)
         
         # Output layer
         out = self.output_layer(out)
@@ -143,9 +146,9 @@ def make_training_run(this_hidden_size, learning_rate, run_device,
     print(net)
     net.train(True)
     
-    #STORED_MODEL = os.path.join("results", "Q04_layer_sizes_1028_213155.pkl")
-    #net.load_state_dict(torch.load(STORED_MODEL))
-    #print("Loading from: ", STORED_MODEL)
+    STORED_MODEL = os.path.join("results", "Q04_layer_sizes_2_1028_213155.pkl")
+    net.load_state_dict(torch.load(STORED_MODEL))
+    print("Loading from: ", STORED_MODEL)
     
     total_net_parms = get_total_parms(net)
     print ("Total trainable parameters:", total_net_parms)

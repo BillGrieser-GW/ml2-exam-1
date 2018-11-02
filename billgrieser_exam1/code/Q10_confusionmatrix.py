@@ -20,6 +20,7 @@ import time
 # For heatmap
 import seaborn as sns
 import matplotlib.pyplot as plt
+import matplotlib
 
 # For classification report
 from sklearn.metrics import classification_report
@@ -31,18 +32,21 @@ from sklearn.metrics import classification_report
 # Initially try a network with a single hidden layer of 500 neurons
 # and a moderate
 # 
+# Identify the model to evaluate
+STORED_MODEL = os.path.join("results", "Q08_dropout_1102_181959.pkl")
+
 CHANNELS = 3
 input_size = (CHANNELS * 32 * 32) # 3 color 32x32 images
-hidden_size = [(1500,)]
+hidden_size = [(900,300,)]
 optimizers = [torch.optim.Adagrad]
-transfer_functions = [nn.ReLU]
+transfer_functions = [nn.LeakyReLU]
 dropout= [0.5]
 num_classes = 10
 num_epochs = 0
 batch_size = 32
 learning_rate = .005
 
-FORCE_CPU = False
+FORCE_CPU = True
 
 if torch.cuda.is_available() and FORCE_CPU != True:
     print("Using cuda device for Torch")
@@ -124,63 +128,34 @@ class Net(nn.Module):
         return out
 
 # =============================================================================
-# Function to make a training run and return the trained network
+# Function to make a model and load it
 # =============================================================================
-def make_model(this_hidden_size, learning_rate, run_device, 
-                      criterion=nn.CrossEntropyLoss(), 
-                      optimizer_function=torch.optim.SGD,
+def make_model(this_hidden_size, from_file, run_device, 
                       transfer_function=nn.ReLU, dropout=0.0):
 
     # Fixed manual seed
     torch.manual_seed(267)
     start_time = time.time()
-    loss=None
     
     # Instantiate a model
     net = Net(input_size, this_hidden_size, num_classes, transfer_function=transfer_function,
               dropout=dropout).to(device=run_device)
-    print(net)
-    net.train()
     
-    STORED_MODEL = os.path.join("results", "Q08_dropout_1029_181713.pkl")
-    net.load_state_dict(torch.load(STORED_MODEL,map_location=run_device))
-    print("Loading from: ", STORED_MODEL)
+    print(net)
+    net.train(False)
+    net.load_state_dict(torch.load(from_file, map_location=run_device))
+    print("Loading model from: ", from_file)
     
     total_net_parms = get_total_parms(net)
     print ("Total trainable parameters:", total_net_parms)
    
-    optimizer = optimizer_function(net.parameters(), lr=learning_rate)
-    print ("Optimizer:", optimizer)
-    print ("Transfer function:", transfer_function)
-     
-    # =============================================================================
-    # Make a run
-    # =============================================================================
-    # --------------------------------------------------------------------------------------------
-    for epoch in range(num_epochs):
-        for i, data in enumerate(train_loader):
-    
-            images, labels = data
-            images= images.view(-1, CHANNELS * 32 * 32)
-            # Put the images and labels in tensors on the run device
-            images= Variable(images).to(device=run_device)
-            labels= Variable(labels).to(device=run_device)
-            optimizer.zero_grad()
-            outputs = net(images)
-            loss = criterion(outputs, labels)
-            loss.backward()
-            optimizer.step()
-            
-            if (i + 1) % 100 == 0:
-                print('Epoch [%d/%d], Step [%d/%d], Loss: %.4f'
-                      % (epoch + 1, num_epochs, i + 1, len(train_set) // batch_size, loss.data.item()))
-                
     return net, time.time() - start_time
-      
+   
+#%%
 # =============================================================================
 # Display results summary
 # =============================================================================
-def show_confusion_matrix(net, run_device):
+def show_evaluation_metrics(net, run_device):
     
     # x is predicted
     # y is actual
@@ -203,8 +178,12 @@ def show_confusion_matrix(net, run_device):
         all_labels += [int(x) for x in labels]
         all_predicted += [int(x) for x in predicted]
             
+    # Draw the confusion matrix
+
+    # This uses Seaborn, which gives a nice plot; however, our cloud instances
+    # don't have the latest version of matplotlib and this code displays the
+    # confusion matrix wiout the counts.
     fig, ax = plt.subplots(figsize=(9, 6))
-      
     plt.title("Confusion Matrix", fontsize=16)
     sns.set(font_scale=1.0)  # Label size
     sns.heatmap(c_matrix, annot=True, annot_kws={"size": 14}, robust=True, fmt='d', \
@@ -216,36 +195,51 @@ def show_confusion_matrix(net, run_device):
     plt.xticks(tick_marks, classes, rotation=45)           
     plt.show()
     
-    # Classification Report
+    # This draws a confusion matrix using just matplotlib
+    fig, ax = plt.subplots(figsize=(7, 7))
+   
+    # Draw the grid squares and color them based on the value of the underlying measure
+    ax.matshow(c_matrix, cmap=plt.cm.Blues, alpha=0.6)
+    
+    # Set the tick labels size
+    for label in (ax.get_xticklabels() + ax.get_yticklabels()):
+        label.set_fontsize(14)
+        
+    for i in range(c_matrix.shape[0]):
+        for j in range(c_matrix.shape[1]):
+            plt.text(x=j, y=i, s="{0}".format(c_matrix[i,j]), 
+                      va='center', ha='center', fontdict={'fontsize':14})
+            
+    plt.ylabel('Actual Labels', fontsize=12) 
+    plt.xlabel('Predicted Labels', fontsize=12)
+    tick_marks = np.arange(len(classes))
+    #ax.set_ticks_position(position='bottom')
+    plt.grid(b=False)
+    plt.xticks(tick_marks, classes, rotation=45, fontsize=10)
+    plt.yticks(tick_marks, classes, fontsize=10)       
+    plt.suptitle("Confusion Matrix", fontdict={'fontsize':16})
+    plt.show()
+    
+    # Print Classification Report
     print("\nClassification Report\n")
     print(classification_report(all_labels, all_predicted, target_names=classes))
     
-    # Confusion Matrix
-    print("\nConfusion matrix (non-graphically)\n")
-    print(c_matrix)
+    # IN CASE OF EMERGENCY: Uncomment
+    #print("\nConfusion matrix (non-graphically)\n")
+    #print(c_matrix)
     
     return c_matrix
 
     
 #%%  
 # =============================================================================
-# MAIN -- make several runs
+# MAIN -- show the matrix for the loaded model
 # =============================================================================
 if __name__ == "__main__":
     
-    # Process each architecture in the list of trials
-    for arch in hidden_size:
-        for opt in optimizers:
-            for tran in transfer_functions:
-                for drop in dropout:
-            
-                    # Make a model and then run the test data through it
-                    net, duration = make_model(arch, 
-                                          learning_rate=learning_rate, 
-                                          run_device=run_device, 
-                                          optimizer_function=opt,
-                                          transfer_function=tran,
-                                          dropout=drop)
-                    
-                    # Confusion Matrix
-                    c_matrix = show_confusion_matrix(net, run_device)
+    # Make a model and then run the test data through it
+    net, duration = make_model(hidden_size[0], STORED_MODEL, run_device, 
+                               transfer_functions[0], dropout[0])
+#%%
+    # Confusion Matrix
+    c_matrix = show_evaluation_metrics(net, run_device)
