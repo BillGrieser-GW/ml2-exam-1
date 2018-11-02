@@ -9,14 +9,12 @@
 
 # --------------------------------------------------------------------------------------------
 import os
-import sys
 import torch
 import torchvision
 import torchvision.transforms as transforms
 import numpy as np
 import torch.nn as nn
 from torch.autograd import Variable
-import datetime
 import time
 import matplotlib.pyplot as plt
 
@@ -145,96 +143,6 @@ def make_model(this_hidden_size, run_device,
 # =============================================================================
 # Display results 
 # =============================================================================
-    
-def show_one_test_sample(net, sample_idx):
-    """Get the test sample with the input index, display it, and show
-    the predicted and actual label"""
-    net.train(False)
-    
-
-def record_test_results(net, run_device, loss, duration, optimizer, 
-                        transfer_function):
-    net.train(False)
-    correct = 0
-    total = 0
-    
-    print("Training run duration (secs): {0:0.1f}\n".format(duration))
-    
-    for images, labels in test_loader:
-        images = Variable(images.view(-1, CHANNELS * 32 * 32)).to(device=run_device)
-        outputs = net(images)
-        _, predicted = torch.max(outputs.data, 1)
-        total += labels.size(0)
-        
-        # Bring the predicted values to the CPU to compare against the labels
-        correct += (predicted.cpu() == labels).sum()
-    
-    print('Accuracy of the network on the 10000 test images: {0:0.1f}%'.format(float(100 * correct) / total))
-
-    class_correct = list(0. for i in range(num_classes))
-    class_total = list(0. for i in range(num_classes))
-    for data in test_loader:
-        images, labels = data
-        images = Variable(images.view(-1, CHANNELS * 32 * 32)).to(device=run_device)
-        outputs = net(images)
-        _, predicted = torch.max(outputs.data, 1)
-        c = (predicted.cpu() == labels)
-        for i in range(len(c)):
-            label = labels[i]
-            class_correct[label] += c[i].int()
-            class_total[label] += 1
-    
-    # --------------------------------------------------------------------------------------------
-    for i in range(num_classes):
-        print('Accuracy of {0:10s} : {1:0.1f}%'.format(classes[i], float(100 * class_correct[i]) / class_total[i]))
-        
-    # =============================================================================
-    # Save results to a file for comparison purposes.
-    # =============================================================================
-    now = datetime.datetime.now()
-    suffix = "_" + now.strftime('%m%d_%H%M%S')
-    
-    if not os.path.exists('results'):
-        os.makedirs('results')
-        
-    run_base='console'
-    
-    if sys.argv[0] != '':
-        run_base = os.path.basename(sys.argv[0])
-        run_base = os.path.join(os.path.splitext(run_base)[0])
-        
-    run_base = os.path.join('results', run_base)
-    
-    # Save run artifacts
-    torch.save(net.state_dict(), run_base + suffix + '.pkl')
-    
-    with open(run_base + suffix + '_results.txt', 'w') as rfile:
-        rfile.write(str(net))
-        rfile.write('\n\n')
-        rfile.write("Hidden Layer sizes: {0}\n".format(hidden_size))
-        rfile.write("Total network weights + biases: {0}\n".format(get_total_parms(net)))
-        rfile.write("Epochs: {0}\n".format(num_epochs))
-        rfile.write("Learning rate: {0}\n".format(learning_rate))
-        rfile.write("Optimizer: {0}\n".format(optimizer))
-        rfile.write("Transfer Function: {0}\n".format(transfer_function))
-        rfile.write("Batch Size: {0}\n".format(batch_size))
-        rfile.write("Final loss: {0:0.4f}\n".format(loss.data.item()))
-        rfile.write("Run device: {0}\n".format(run_device))
-        rfile.write("Training run duration (secs): {0:0.1f}\n".format(duration))
-        
-        rfile.write('\n')
-        rfile.write('Accuracy of the network on the 10000 test images: {0:0.1f}%\n'.format(float(100 * correct) / total))
-        rfile.write('\n')
-        for i in range(num_classes):
-            rfile.write('Accuracy of {0:10s} : {1:0.1f}%\n'.format(classes[i], float(100 * class_correct[i]) / class_total[i]))
-    
-def imshow(img, title='One Image'):
-    img = img / 2 + 0.5
-    npimg = img.numpy()
-    plt.imshow(np.transpose(npimg, (1, 2, 0)))
-    plt.title(title)
-    plt.show()  # Show it now
-    
 def imshowax(ax, img):
     img = img / 2 + 0.5
     npimg = img.numpy()
@@ -246,8 +154,7 @@ def imshowax(ax, img):
 # MAIN -- Accept input from the user for test data and results to display
 # =============================================================================
 if __name__ == "__main__":
-    
-    
+
     # Make a model
     net, duration = make_model(hidden_size[0],
                               run_device=run_device, 
@@ -260,6 +167,16 @@ if __name__ == "__main__":
         outputs = net(images)
         _, predicted = torch.max(outputs.data, 1)
         predicted = predicted.cpu()
+        outputs = outputs.cpu()
+        images = images.cpu()
+    
+    correct = 0
+    # How many are correct?
+    for idx in range(len(labels)):
+        if predicted[idx] == labels[idx]:
+            correct += 1
+            
+    print("{0} correct out of {1} total test samples.".format(correct, len(labels)))
 
 #%%
     normalizer = nn.Softmax(dim=1)
@@ -284,10 +201,11 @@ if __name__ == "__main__":
             f.suptitle("Actual: {0} Predicted: {1}".
                    format(classes[labels[image_idx]], classes[int(predicted[image_idx])]))
             imshowax(ax[0], images[image_idx].reshape(3,32,32))
+            ax[0].set_xlabel("Image {0}".format(image_idx))
             y_pos = np.arange(len(classes))
             ax[1].set_yticks(y_pos)
             ax[1].set_yticklabels(classes, fontsize=8)
-            
+            ax[1].set_xlabel("Confidence of class prediction")
             softmaxed = normalizer(outputs[image_idx:image_idx+1])[0]
             
             ax[1].barh(y_pos, softmaxed, align='center',

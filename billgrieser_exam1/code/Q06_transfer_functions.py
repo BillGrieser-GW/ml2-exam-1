@@ -28,9 +28,9 @@ import time
 CHANNELS = 3
 input_size = (CHANNELS * 32 * 32) # 3 color 32x32 images
 #hidden_size = [(400, 200, 50), (400, 400, 100, 100)]
-hidden_size = [(1000,)]
-optimizers = [torch.optim.Adagrad]
-transfer_functions = [nn.ReLU, nn.Sigmoid, nn.Tanh, nn.Hardtanh ]
+hidden_size = [(1000,), (900,300)]
+optimizers = [torch.optim.SGD, torch.optim.Adagrad]
+transfer_functions = [nn.Tanh, nn.LeakyReLU]
 num_classes = 10
 num_epochs = 50
 batch_size = 32

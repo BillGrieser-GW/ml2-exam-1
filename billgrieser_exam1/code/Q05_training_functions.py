@@ -1,9 +1,9 @@
 # =============================================================================
-# Question 4
+# Question 5
 #
-# Try several archictures of neurons in layers. The code to build a 
-# network is modified to accept a variable number of layers, and then
-# several runs are performed.
+# Try several archictures different optimization functions with
+# the best-performing neuron architecture and see how network
+# performance changes.
 #
 # =============================================================================
 
@@ -27,10 +27,8 @@ import time
 # 
 CHANNELS = 3
 input_size = (CHANNELS * 32 * 32) # 3 color 32x32 images
-#hidden_size = [(400, 200, 50), (400, 400, 100, 100)]
-hidden_size = [(1000,), (500, 500, 500)]
-optimizers = [torch.optim.SGD, torch.optim.Adagrad, torch.optim.Adam,
-              torch.optim.Rprop]
+hidden_size = [(1000,), (1500,), (900,300), ]
+optimizers = [torch.optim.SGD, torch.optim.Adagrad, torch.optim.Adam]
 num_classes = 10
 num_epochs = 50
 batch_size = 32
