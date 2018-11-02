@@ -284,6 +284,7 @@ if __name__ == "__main__":
     
     print("\nCalculating standard deviation of the gradients of all the input features:")
     stds = all_grads.std(axis=0)
+    means = all_grads.mean(axis=0)
 
     top_10 = sorted(range(len(stds)), key=lambda x: stds[x], reverse=False)[:10]
     print ("Top 10 inputs by standard deviation of input wrt loss:")
@@ -292,17 +293,43 @@ if __name__ == "__main__":
         print("   Index {0:5d}: Standard Deviation: {1}".format(top_10[i], stds[top_10[i]]))
         
     # Write to file
-    #print("\n\nSaving saved grads of shape:", all_grads.shape)
-    #np.savetxt("Q07_gradients.csv", all_grads)
-    #print("Done Saving saved grads of shape:", all_grads.shape)
+    print("\n\nSaving saved standard deviation of grads of shape:", stds.shape)
+    np.savetxt("Q07_gradients_stds.csv", stds)
+    
 #%%
     def imshow(ax, img):
         npimg = img / 2 + 0.5
         #npimg = img.numpy()
-        ax.imshow(np.transpose(npimg, (1, 2, 0)))          
-    
-    f, ax = plt.subplots(figsize=(6,7))
-    f.suptitle("Pixel gradient hotspots")  
-
-    imshow(ax, stds)          
+        ax.imshow(np.transpose(npimg, (1, 2, 0))) 
         
+    def imshow_1channel(ax, img, cmap='Greys'):
+        ax.imshow(img, cmap=cmap)          
+    
+    f, ax = plt.subplots(1,3, figsize=(9,3))
+    f.suptitle("Standard Deviation of Gradients of each pixel")  
+    ax[0].set_title("Red")
+    imshow_1channel(ax[0], stds.reshape(3,32,32)[0], cmap='Reds')
+    ax[1].set_title("Green")
+    imshow_1channel(ax[1], stds.reshape(3,32,32)[1], cmap='Greens')
+    ax[2].set_title("Blue")
+    imshow_1channel(ax[2], stds.reshape(3,32,32)[2], cmap='Blues')
+    plt.show()
+    
+    f, ax = plt.subplots(1,3, figsize=(9,3))
+    f.suptitle("Mean of Gradients of each pixel")  
+    ax[0].set_title("Red")
+    imshow_1channel(ax[0], means.reshape(3,32,32)[0], cmap='Reds')
+    ax[1].set_title("Green")
+    imshow_1channel(ax[1], means.reshape(3,32,32)[1], cmap='Greens')
+    ax[2].set_title("Blue")
+    imshow_1channel(ax[2], means.reshape(3,32,32)[2], cmap='Blues')
+    plt.show()
+    
+     
+#%%
+#    an_image = images_asrun[44].detach().numpy()
+#    f, ax = plt.subplots(figsize=(6,7))
+#    imshow(ax, an_image.reshape(3,32,32))
+  
+ #%%
+    
