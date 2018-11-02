@@ -24,7 +24,7 @@ input_size = (CHANNELS * 32 * 32) # 3 color 32x32 images
 #hidden_size = [(400, 200, 50), (400, 400, 100, 100)]
 hidden_size = [(1500,),(500,),(1000,), (800,200,200,50), (600,300,300), (900, 100, 200)]
 num_classes = 10
-num_epochs = 300
+num_epochs = 50
 batch_size = 32
 learning_rate = .005
 
@@ -77,9 +77,9 @@ def get_total_parms(module):
 # function in each hidden layer. It uses purelin on the output layer.
 #
 # =============================================================================
-class Net(nn.Module):
+class NetPurelin(nn.Module):
     def __init__(self, input_size, hidden_size, num_classes):
-        super(Net, self).__init__()
+        super(NetPurelin, self).__init__()
         
         last_in = input_size
         self.hidden_layers = []
@@ -103,18 +103,50 @@ class Net(nn.Module):
         out = self.output_layer(out)
         return out
 
+class NetSoftmax(nn.Module):
+    def __init__(self, input_size, hidden_size, num_classes):
+        super(NetSoftmax, self).__init__()
+        
+        last_in = input_size
+        self.hidden_layers = []
+       
+        for idx, sz in enumerate(hidden_size):
+            new_module = nn.Linear(last_in, sz)
+            self.add_module("layer_{0:02d}".format(idx+1), new_module)
+            self.hidden_layers.append((new_module, nn.ReLU()))
+            last_in = sz
+        
+        # Add the output layer (with an implied purelin activation)
+        self.output_layer = nn.Linear(last_in, num_classes)
+        self.output_transfer = nn.Softmax(dim=1)
+
+    def forward(self, x):
+        out = x
+        for layer, transfer in self.hidden_layers:
+            out = layer(out)
+            out = transfer(out)
+        
+        # Output layer
+        out = self.output_layer(out)
+        out = self.output_transfer(out)
+        return out
+
 # =============================================================================
 # Function to make a training run and return the trained network
 # =============================================================================
 def make_training_run(this_hidden_size, learning_rate, run_device, criterion=nn.CrossEntropyLoss(), 
-               optimizer_function=torch.optim.SGD):
+               optimizer_function=torch.optim.SGD, use_softmax=False):
 
     # Fixed manual seed
     torch.manual_seed(267)
     start_time = time.time()
     
     # Instantiate a model
-    net = Net(input_size, this_hidden_size, num_classes).to(device=run_device)
+    if use_softmax: 
+        net = NetSoftmax(input_size, this_hidden_size, num_classes).to(device=run_device)
+    else:
+        net = NetPurelin(input_size, this_hidden_size, num_classes).to(device=run_device)
+        
     print(net)
     net.train()
     
@@ -235,11 +267,15 @@ if __name__ == "__main__":
     # Process each architecture in the list of trials
     for arch in hidden_size:
         
-        # Make a run
-        net, loss, duration = make_training_run(arch, learning_rate=learning_rate, 
-                                      run_device=run_device)
+        for use_softmax in (False, True):
         
-        # Show/Store the results
-        record_test_results(net, run_device, loss, duration)
+            # Make a run 
+            net, loss, duration = make_training_run(arch, learning_rate=learning_rate, 
+                                          run_device=run_device, use_softmax=use_softmax)
+            
+            # Show/Store the results
+            record_test_results(net, run_device, loss, duration)
+        
+        
         
         

@@ -25,14 +25,14 @@ import datetime
 
 #
 # Initially try a network with a single hidden layer of 500 neurons
-# and a moderate
+# and a moderate number of neurons and learning rate
 # 
 CHANNELS = 3
 input_size = (CHANNELS * 32 * 32) # 3 color 32x32 images
-hidden_size = 1000
+hidden_size = 500
 num_classes = 10
-num_epochs = 200
-batch_size = 32
+num_epochs = 50
+batch_size = 250
 learning_rate = .005
 
 FORCE_CPU = False
@@ -63,28 +63,6 @@ test_loader = torch.utils.data.DataLoader(test_set, batch_size=batch_size, shuff
 
 # Find the right classes name. Save it as a tuple of size 10.
 classes = ('airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
-
-# =============================================================================
-# Show a sample of the data
-# =============================================================================
-# --------------------------------------------------------------------------------------------
-def imshow(img):
-    img = img / 2 + 0.5
-    npimg = img.numpy()
-    plt.imshow(np.transpose(npimg, (1, 2, 0)))
-    plt.show()  # Show it now
-
-# --------------------------------------------------------------------------------------------
-# Show some sample images
-dataiter = iter(train_loader)
-images, labels = dataiter.next()
-
-# Just show a small grid to start with their labels
-print("A sample of the data.")
-imshow(torchvision.utils.make_grid(images[:16], nrow=4, normalize=False))
-print("Labels:")
-print(''.join('{0:10s}'.format(classes[labels[j]]) + ('\n' if (j+1) % 4 == 0 else ' ') for j in range(16)))
-print()
 
 # =============================================================================
 # Set up the network
