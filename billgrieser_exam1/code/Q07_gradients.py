@@ -3,7 +3,8 @@
 #
 # Load a pre-trained model and run one epoch to capture the gradients of 
 # all the inputs for one pass through the data. Save as a CSV
-# a file with the standard deviation of each pixel across the run.
+# a file with the standard deviation of each pixel across the run. Visualize
+# the standard deviation for the gradient of each pixel and the mean gradient
 # =============================================================================
 
 
@@ -262,11 +263,9 @@ def record_test_results(net, run_device, loss, duration, optimizer,
             rfile.write('Accuracy of {0:10s} : {1:0.1f}%\n'.format(classes[i], float(100 * class_correct[i]) / class_total[i]))
     
 # =============================================================================
-# MAIN -- make several runs
+# MAIN -- Make one run
 # =============================================================================
 if __name__ == "__main__":
-    
-    # Make a model
     
     # Make a run
     net, loss, duration, optimizer, transfer_function, images_asrun, saved_grads = \
@@ -311,6 +310,7 @@ if __name__ == "__main__":
     imshow_1channel(ax[0], stds.reshape(3,32,32)[0], cmap='Reds')
     ax[1].set_title("Green")
     imshow_1channel(ax[1], stds.reshape(3,32,32)[1], cmap='Greens')
+    ax[1].set_xlabel("Darker is greater")
     ax[2].set_title("Blue")
     imshow_1channel(ax[2], stds.reshape(3,32,32)[2], cmap='Blues')
     plt.show()
@@ -321,11 +321,11 @@ if __name__ == "__main__":
     imshow_1channel(ax[0], means.reshape(3,32,32)[0], cmap='Reds')
     ax[1].set_title("Green")
     imshow_1channel(ax[1], means.reshape(3,32,32)[1], cmap='Greens')
+    ax[1].set_xlabel("Darker is greater")
     ax[2].set_title("Blue")
     imshow_1channel(ax[2], means.reshape(3,32,32)[2], cmap='Blues')
     plt.show()
     
-     
 #%%
 #    an_image = images_asrun[44].detach().numpy()
 #    f, ax = plt.subplots(figsize=(6,7))
